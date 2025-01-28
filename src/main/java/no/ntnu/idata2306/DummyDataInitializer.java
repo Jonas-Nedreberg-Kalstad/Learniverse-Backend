@@ -14,7 +14,7 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
-        //log.info("Importing test data...");
+        log.info("Importing test data...");
 
 
     }

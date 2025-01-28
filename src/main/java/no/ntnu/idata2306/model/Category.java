@@ -12,33 +12,34 @@ import java.util.Set;
 
 @Getter
 @Setter
-@Schema(description = "Roles which users may have.", name = "role")
+@Schema(description = "Category of a course.", name = "category")
 @Entity
-public class Role {
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
-    @Schema(description = "role id")
+    @Schema(description = "category id")
     private int id;
 
-    @Column(name = "role", nullable = false, unique = true)
-    @Schema(description = "role name")
-    private String role;
+    @Column(name = "category", nullable = false, unique = true)
+    @Schema(description = "category name")
+    private String category;
 
     @JsonBackReference
-    @ManyToMany(mappedBy = "roles")
-    @Schema(description = "Users with the given role(s)")
-    private Set<User> users = new LinkedHashSet<>();
-
-    public Role() {
-    }
+    @OneToMany(mappedBy = "category")
+    @Schema(description = "courses with the given category")
+    private Set<Course> courses = new LinkedHashSet<>();
 
     /**
      * Constructor
-     * @param name name
+     * @param name category name
      */
-    public Role(String name) {
-        this.role = name;
+    public Category(String name) {
+        this.category = name;
+    }
+
+    public Category(){
+
     }
 }

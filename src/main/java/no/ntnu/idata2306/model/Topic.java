@@ -1,7 +1,6 @@
 package no.ntnu.idata2306.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -12,33 +11,33 @@ import java.util.Set;
 
 @Getter
 @Setter
-@Schema(description = "Roles which users may have.", name = "role")
+@Schema(description = "Topic which courses may have.", name = "topic")
 @Entity
-public class Role {
+public class Topic {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
-    @Schema(description = "role id")
+    @Schema(description = "topic id")
     private int id;
 
-    @Column(name = "role", nullable = false, unique = true)
-    @Schema(description = "role name")
-    private String role;
+    @Column(name = "topic", nullable = false, unique = true)
+    @Schema(description = "topic name")
+    private String topic;
 
     @JsonBackReference
-    @ManyToMany(mappedBy = "roles")
-    @Schema(description = "Users with the given role(s)")
-    private Set<User> users = new LinkedHashSet<>();
+    @ManyToMany(mappedBy = "topics")
+    @Schema(description = "Courses with the given topic(s)")
+    private Set<Course> courses = new LinkedHashSet<>();
 
-    public Role() {
+    public Topic() {
     }
 
     /**
      * Constructor
      * @param name name
      */
-    public Role(String name) {
-        this.role = name;
+    public Topic(String name) {
+        this.topic = name;
     }
 }

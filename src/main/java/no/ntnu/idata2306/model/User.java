@@ -23,40 +23,31 @@ public class User {
     @Schema(description = "ID of the user")
     private int id;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column(name = "first_name", nullable = false, unique = false)
     @Schema(description = "First name of the user")
     private String firstName;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column(name = "last_name", nullable = false, unique = false)
     @Schema(description = "Last name of the user")
     private String lastName;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column(name = "email", nullable = false, unique = true, updatable = false)
     @Schema(description = "Email of the user")
     private String email;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column(name = "password", nullable = false, unique = false)
     @Schema(description = "Password of the user")
     private String password;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column(name = "phone_number", nullable = true, unique = false)
     @Schema(description = "phone number of the user")
     private String phoneNumber;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column(name = "created", nullable = false, unique = false)
     @Schema(description = "the date user was created")
     private LocalDateTime created;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column(name = "updated", nullable = true, unique = false)
     @Schema(description = "the date user was updated")
     private LocalDateTime updated;
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @Column(name = "deleted", nullable = false, unique = false, updatable = true)
     @Schema(description = "If user account is deleted or not")
     private boolean deleted;
 
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
