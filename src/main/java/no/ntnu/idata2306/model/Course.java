@@ -1,11 +1,9 @@
 package no.ntnu.idata2306.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -14,6 +12,9 @@ import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Schema(description = "course of a given provider.", name = "course")
 @Entity
 public class Course {
@@ -62,45 +63,55 @@ public class Course {
     @Schema(description = "course is active")
     private boolean active;
 
+    @Column(name = "created", nullable = false)
+    @Schema(description = "course created date")
+    private LocalDateTime created;
+
+    @Column(name = "updated", nullable = true)
+    @Schema(description = "course updated date")
+    private LocalDateTime updated;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id", referencedColumnName = "id")
     @JsonManagedReference
-    @ManyToOne()
-    @JoinColumns(
-            @JoinColumn(name = "category_id", referencedColumnName = "id")
-    )
-    @Schema(description = "category of the given course")
+    @Schema(description = "Category of the given course")
     private Category category;
 
+    @ManyToOne
+    @JoinColumn(name = "credit_id", referencedColumnName = "id")
     @JsonManagedReference
-    @ManyToOne()
-    @JoinColumns(
-            @JoinColumn(name = "credit_id", referencedColumnName = "id")
-    )
     @Schema(description = "credit of the given course")
     private Credit credit;
 
+    @ManyToOne
+    @JoinColumn(name = "currency_id", referencedColumnName = "id")
     @JsonManagedReference
-    @ManyToOne()
-    @JoinColumns(
-            @JoinColumn(name = "currency_id", referencedColumnName = "id")
-    )
     @Schema(description = "currency of the given price")
     private Currency currency;
 
+    @ManyToOne
+    @JoinColumn(name = "difficulty_level_id", referencedColumnName = "id")
     @JsonManagedReference
-    @ManyToOne()
-    @JoinColumns(
-            @JoinColumn(name = "difficulty_level_id", referencedColumnName = "id")
-    )
     @Schema(description = "difficulty level of the given course")
     private DifficultyLevel difficultyLevel;
 
+    @ManyToOne
+    @JoinColumn(name = "hours_per_week_id", referencedColumnName = "id")
     @JsonManagedReference
-    @ManyToOne()
-    @JoinColumns(
-            @JoinColumn(name = "hours_per_week_id", referencedColumnName = "id")
-    )
     @Schema(description = "hours per week of the given course")
     private HoursPerWeek hoursPerWeek;
+
+    @ManyToOne
+    @JoinColumn(name = "created_by", referencedColumnName = "id")
+    @JsonManagedReference
+    @Schema(description = "user that created the course")
+    private User createdBy;
+
+    @ManyToOne
+    @JoinColumn(name = "updated_by", referencedColumnName = "id")
+    @JsonManagedReference
+    @Schema(description = "user that updated the course")
+    private User updatedBy;
 
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)
@@ -120,32 +131,4 @@ public class Course {
     @Schema(description = "RelatedCertificate(s) of a given course")
     private Set<RelatedCertificate> relatedCertificates = new LinkedHashSet<>();
 
-
-    /**
-     *
-     * @param courseName                    courseName
-     * @param price                         price
-     * @param description                   description
-     * @param requirementDescription        requirementDescription
-     * @param courseUrl                     courseUrl
-     * @param courseImageUrl                courseImageUrl
-     * @param startDate                     startDate
-     * @param endDate                       endDate
-     * @param active                        active
-     */
-    public Course(String courseName, BigDecimal price, String description, String requirementDescription, String courseUrl, String courseImageUrl, LocalDateTime startDate, LocalDateTime endDate, boolean active) {
-        this.courseName = courseName;
-        this.price = price;
-        this.description = description;
-        this.requirementDescription = requirementDescription;
-        this.courseUrl = courseUrl;
-        this.courseImageUrl = courseImageUrl;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.active = active;
-    }
-
-    public Course(){
-
-    }
 }

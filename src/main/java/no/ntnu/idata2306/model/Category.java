@@ -1,17 +1,20 @@
 package no.ntnu.idata2306.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Category of a course.", name = "category")
 @Entity
 public class Category {
@@ -30,16 +33,4 @@ public class Category {
     @OneToMany(mappedBy = "category")
     @Schema(description = "courses with the given category")
     private Set<Course> courses = new LinkedHashSet<>();
-
-    /**
-     * Constructor
-     * @param name category name
-     */
-    public Category(String name) {
-        this.category = name;
-    }
-
-    public Category(){
-
-    }
 }

@@ -5,12 +5,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Topic which courses may have.", name = "topic")
 @Entity
 public class Topic {
@@ -29,15 +33,4 @@ public class Topic {
     @ManyToMany(mappedBy = "topics")
     @Schema(description = "Courses with the given topic(s)")
     private Set<Course> courses = new LinkedHashSet<>();
-
-    public Topic() {
-    }
-
-    /**
-     * Constructor
-     * @param name name
-     */
-    public Topic(String name) {
-        this.topic = name;
-    }
 }

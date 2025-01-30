@@ -5,12 +5,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "difficultyLevel of a course.", name = "difficulty_level")
 @Entity
 public class DifficultyLevel {
@@ -29,11 +33,4 @@ public class DifficultyLevel {
     @OneToMany(mappedBy = "difficultyLevel")
     @Schema(description = "courses with the given difficultyLevel")
     private Set<Course> courses = new LinkedHashSet<>();
-
-    public DifficultyLevel(String type) {
-        this.type = type;
-    }
-
-    public DifficultyLevel() {
-    }
 }

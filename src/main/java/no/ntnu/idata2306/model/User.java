@@ -1,11 +1,13 @@
 package no.ntnu.idata2306.model;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -13,6 +15,9 @@ import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 @Schema(description = "User of the application", name = "User")
 @Entity
 public class User {
@@ -26,27 +31,43 @@ public class User {
     @Column(name = "first_name", nullable = false, unique = false)
     @Schema(description = "First name of the user")
     private String firstName;
+
     @Column(name = "last_name", nullable = false, unique = false)
     @Schema(description = "Last name of the user")
     private String lastName;
+
     @Column(name = "email", nullable = false, unique = true, updatable = false)
     @Schema(description = "Email of the user")
     private String email;
+
     @Column(name = "password", nullable = false, unique = false)
     @Schema(description = "Password of the user")
     private String password;
+
     @Column(name = "phone_number", nullable = true, unique = false)
-    @Schema(description = "phone number of the user")
+    @Schema(description = "Phone number of the user")
     private String phoneNumber;
+
     @Column(name = "created", nullable = false, unique = false)
-    @Schema(description = "the date user was created")
+    @Schema(description = "The date user was created")
     private LocalDateTime created;
+
     @Column(name = "updated", nullable = true, unique = false)
-    @Schema(description = "the date user was updated")
+    @Schema(description = "The date user was updated")
     private LocalDateTime updated;
+
     @Column(name = "deleted", nullable = false, unique = false, updatable = true)
     @Schema(description = "If user account is deleted or not")
     private boolean deleted;
+
+    @OneToMany(mappedBy = "createdBy")
+    private Set<Course> createdCourses = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "updatedBy")
+    private Set<Course> updatedCourses = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "user")
+    private Set<PaymentCard> paymentCards = new LinkedHashSet<>();
 
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)
@@ -56,29 +77,4 @@ public class User {
     )
     @Schema(description = "Roles the user has")
     private Set<Role> roles = new LinkedHashSet<>();
-
-    /**
-     * Constructor with parameters
-     *
-     * @param firstName    first name of user.
-     * @param lastName     last name of user.
-     * @param email        users email.
-     * @param password     users password.
-     * @param phoneNumber  users phone number.
-     * @param created      date user were created
-     */
-    public User(String firstName, String lastName, String email, String password, String phoneNumber, LocalDateTime created) {
-        this.email = email;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.password = password;
-        this.phoneNumber = phoneNumber;
-        this.created = created;
-        this.deleted = false;
-    }
-
-    public User(){
-
-    }
-
 }

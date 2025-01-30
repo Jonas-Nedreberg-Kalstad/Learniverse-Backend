@@ -5,12 +5,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Related certificate which courses may have.", name = "related_certificate")
 @Entity
 public class RelatedCertificate {
@@ -29,15 +33,4 @@ public class RelatedCertificate {
     @ManyToMany(mappedBy = "relatedCertificates")
     @Schema(description = "Courses with the given relatedCertificate(s)")
     private Set<Course> courses = new LinkedHashSet<>();
-
-    public RelatedCertificate() {
-    }
-
-    /**
-     * Constructor
-     * @param name name
-     */
-    public RelatedCertificate(String name) {
-        this.certificateName = name;
-    }
 }

@@ -5,12 +5,16 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "hoursPerWeek of a course.", name = "hours_per_week")
 @Entity
 public class HoursPerWeek {
@@ -29,11 +33,4 @@ public class HoursPerWeek {
     @OneToMany(mappedBy = "hoursPerWeek")
     @Schema(description = "courses with the given hoursPerWeek")
     private Set<Course> courses = new LinkedHashSet<>();
-
-    public HoursPerWeek(int hours) {
-        this.hours = hours;
-    }
-
-    public HoursPerWeek() {
-    }
 }

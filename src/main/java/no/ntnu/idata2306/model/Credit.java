@@ -5,12 +5,17 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 @Getter
 @Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Schema(description = "Credit of a course.", name = "credit")
 @Entity
 public class Credit {
@@ -21,19 +26,12 @@ public class Credit {
     @Schema(description = "credit id")
     private int id;
 
-    @Column(name = "credit", nullable = false, unique = true, length = 35)
-    @Schema(description = "credit name")
-    private String credit;
+    @Column(name = "credit", nullable = false, unique = true)
+    @Schema(description = "credit value")
+    private BigDecimal credit;
 
     @JsonBackReference
     @OneToMany(mappedBy = "credit")
     @Schema(description = "courses with the given credit")
     private Set<Course> courses = new LinkedHashSet<>();
-
-    public Credit(String credit) {
-        this.credit = credit;
-    }
-
-    public Credit() {
-    }
 }
