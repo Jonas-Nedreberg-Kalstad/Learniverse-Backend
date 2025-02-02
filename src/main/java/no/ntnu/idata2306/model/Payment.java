@@ -1,12 +1,12 @@
 package no.ntnu.idata2306.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 @Schema(description = "Payment details", name = "Payment")
 @Entity
 public class Payment {
@@ -36,11 +35,13 @@ public class Payment {
 
     @ManyToOne
     @JoinColumn(name = "payment_method_id", referencedColumnName = "id")
+    @JsonBackReference
     @Schema(description = "Payment method used")
     private PaymentMethod paymentMethod;
 
     @ManyToOne
     @JoinColumn(name = "payment_card_id", referencedColumnName = "id")
+    @JsonBackReference
     @Schema(description = "Payment card used")
     private PaymentCard paymentCard;
 }

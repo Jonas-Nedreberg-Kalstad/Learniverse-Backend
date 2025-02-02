@@ -14,21 +14,21 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Payment method details", name = "payment_method")
+@Schema(description = "Order status details", name = "order_status")
 @Entity
-public class PaymentMethod {
+public class OrderStatus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
-    @Schema(description = "Payment method ID")
+    @Schema(description = "Order status ID")
     private int id;
 
-    @Column(name = "method", nullable = false, unique = true)
-    @Schema(description = "Payment method name")
-    private String method;
+    @Column(name = "status", nullable = false, unique = true)
+    @Schema(description = "Order status")
+    private String status;
 
-    @OneToMany(mappedBy = "paymentMethod")
-    @Schema(description = "Payments associated with the payment method")
-    private Set<Payment> payments = new LinkedHashSet<>();
+    @OneToMany(mappedBy = "orderStatus")
+    @Schema(description = "Orders associated with the order status")
+    private Set<Orders> orders = new LinkedHashSet<>();
 }

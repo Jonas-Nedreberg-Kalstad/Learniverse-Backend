@@ -1,5 +1,6 @@
 package no.ntnu.idata2306.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -8,12 +9,14 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Payment card details", name = "PaymentCard")
+@Schema(description = "Payment card details", name = "payment_card")
 @Entity
 public class PaymentCard {
 
@@ -41,6 +44,12 @@ public class PaymentCard {
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @JsonBackReference
     @Schema(description = "User associated with the payment card")
     private User user;
+
+    @OneToMany(mappedBy = "paymentCard")
+    @JsonBackReference
+    @Schema(description = "Payments with the given payment card")
+    private Set<Payment> payments = new LinkedHashSet<>();
 }

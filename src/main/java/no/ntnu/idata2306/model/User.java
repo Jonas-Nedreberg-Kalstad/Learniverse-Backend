@@ -1,5 +1,6 @@
 package no.ntnu.idata2306.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -61,12 +62,18 @@ public class User {
     private boolean deleted;
 
     @OneToMany(mappedBy = "createdBy")
+    @JsonBackReference
+    @Schema(description = "courses with the given user")
     private Set<Course> createdCourses = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "updatedBy")
+    @JsonBackReference
+    @Schema(description = "courses with the given user")
     private Set<Course> updatedCourses = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
+    @JsonBackReference
+    @Schema(description = "payment cards with the given user")
     private Set<PaymentCard> paymentCards = new LinkedHashSet<>();
 
     @JsonManagedReference
