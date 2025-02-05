@@ -76,6 +76,12 @@ public class User {
     @Schema(description = "payment cards with the given user")
     private Set<PaymentCard> paymentCards = new LinkedHashSet<>();
 
+    @ManyToOne
+    @JsonBackReference
+    @JoinColumn(name = "provider_id")
+    @Schema(description = "provider associated with the given user")
+    private Provider provider;
+
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
