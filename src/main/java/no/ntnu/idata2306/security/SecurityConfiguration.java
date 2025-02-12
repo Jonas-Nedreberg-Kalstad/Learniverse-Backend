@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableMethodSecurity
@@ -23,18 +24,18 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfiguration {
 
     /**
-     * A service providing our users from the database
+     * Service for retrieving user details from the database.
      */
     @Autowired
     private UserDetailsService userDetailsService;
-
+    @Autowired
+    private JwtRequestFilter jwtFilter;
 
     /**
-     * This method will be called automatically by the framework to find out what authentication to use.
-     * Here we tell that we want to load users from a database
+     * Configures the authentication manager to use the user details service for loading user data from the database.
      *
-     * @param auth Authentication builder
-     * @throws Exception
+     * @param auth the authentication manager builder
+     * @throws Exception if an error occurs during configuration
      */
     @Autowired
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -42,13 +43,17 @@ public class SecurityConfiguration {
     }
 
     /**
-     * This method will be called automatically by the framework to find out what authentication to use.
+     * Sets up the authorization filter chain for the application, defining security rules and filters.
      *
-     * @param http HttpSecurity setting builder
-     * @throws Exception
+     * @param http the HttpSecurity configuration builder
+     * @return the configured SecurityFilterChain
+     * @throws Exception if an error occurs during configuration
      */
     @Bean
-    @Operation(summary = "Configure authorization filter chain", description = "Sets up the authorization filter chain for the application")
+    @Operation(
+            summary = "Configure Authorization Filter Chain",
+            description = "Sets up the authorization filter chain for the application, defining security rules and filters."
+    )
     public SecurityFilterChain configureAuthorizationFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
@@ -58,10 +63,18 @@ public class SecurityConfiguration {
                         .requestMatchers("/swagger-ui/**").hasAuthority("ADMIN")
                         .requestMatchers("/swagger-ui.html").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
+    /**
+     * Creates an authentication manager bean.
+     *
+     * @param config the authentication configuration
+     * @return the authentication manager
+     * @throws Exception if an error occurs during configuration
+     */
     @Bean
     @Operation(summary = "Authentication manager", description = "Creates an authentication manager bean.")
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
@@ -69,9 +82,9 @@ public class SecurityConfiguration {
     }
 
     /**
-     * This method is called to decide what encryption to use for password checking
+     * Defines the password encoder bean using BCrypt for password encryption.
      *
-     * @return The password encryptor
+     * @return the password encoder
      */
     @Operation(summary = "Password encoder", description = "Defines the password encoder bean using BCrypt.")
     @Bean
