@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.function.Function;
 
 /**
- * Utility class for handling JWT tokens
+ * Utility class for handling JWT tokens.
  */
 @Component
 public class JwtUtil {
@@ -24,11 +24,11 @@ public class JwtUtil {
     private static final String JWT_AUTH_KEY = "roles";
 
     /**
-     * Check if a token is valid for a given user
+     * Validates a JWT token for a given user.
      *
-     * @param token       Token to validate
-     * @param userDetails Object containing user details
-     * @return True if the token matches the current user and is still valid
+     * @param token       the JWT token to validate
+     * @param userDetails the user details to validate against
+     * @return true if the token is valid for the user and not expired, false otherwise
      */
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String userEmail = extractUser(token);
@@ -36,11 +36,11 @@ public class JwtUtil {
     }
 
     /**
-     * Generates a token which is used to validate user when browsing website.
+     * Generates a JWT token for a given user.
      * <b>Token is valid for 12 hours after it is generated.</b>
      *
-     * @param userDetails details of user which is to receive a token
-     * @return token
+     * @param userDetails the user details for which the token is generated
+     * @return the generated JWT token
      */
     public String generateToken(UserDetails userDetails) {
         final long TIME_NOW = System.currentTimeMillis();
@@ -57,38 +57,43 @@ public class JwtUtil {
                 .compact();
     }
 
+    /**
+     * Retrieves the signing key used for JWT token generation and validation.
+     *
+     * @return the signing key
+     */
     private SecretKey getSigningKey() {
         byte[] keyBytes = SECRET_KEY.getBytes(StandardCharsets.UTF_8);
         return new SecretKeySpec(keyBytes, 0, keyBytes.length, "HmacSHA256");
     }
 
     /**
-     * Find username from a JWT token
+     * Extracts the username from a JWT token.
      *
-     * @param token JWT token
-     * @return Username
+     * @param token the JWT token
+     * @return the username extracted from the token
      */
     public String extractUser(String token) {
         return extractClaim(token, Claims::getSubject);
     }
 
     /**
-     * Finds expiration date from token.
+     * Extracts the expiration date from a JWT token.
      *
-     * @param token token
-     * @return expiration date
+     * @param token the JWT token
+     * @return the expiration date extracted from the token
      */
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
 
     /**
-     * Extracts claims form token.
+     * Extracts a specific claim from a JWT token.
      *
-     * @param token token
-     * @param claimsResolver function which is applied to claims to retrieve correct claim.
-     * @return claims
-     * @param <T> type of claim which is to be extracted
+     * @param token the JWT token
+     * @param claimsResolver the function to apply to the claims to retrieve the desired claim
+     * @param <T> the type of the claim to extract
+     * @return the extracted claim
      */
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = extractAllClaims(token);
@@ -96,19 +101,20 @@ public class JwtUtil {
     }
 
     /**
-     * Extract all claims from token.
-     * @param token token
-     * @return claims
+     * Extracts all claims from a JWT token.
+     *
+     * @param token the JWT token
+     * @return the claims extracted from the token
      */
     private Claims extractAllClaims(String token) {
         return Jwts.parser().verifyWith(getSigningKey()).build().parseSignedClaims(token).getPayload();
     }
 
     /**
-     * Checks if token is expired.
+     * Checks if a JWT token is expired.
      *
-     * @param token token
-     * @return true if token is expired, false otherwise.
+     * @param token the JWT token
+     * @return true if the token is expired, false otherwise
      */
     public Boolean isTokenExpired(String token) {
         try {
@@ -119,8 +125,9 @@ public class JwtUtil {
     }
 
     /**
-     * sets the secret key, necessary for testing.
-     * @param secretKey
+     * Sets the secret key for JWT token operations. This is primarily used for testing purposes.
+     *
+     * @param secretKey the secret key to set
      */
     public void setSecretKey(String secretKey) {
         this.SECRET_KEY = secretKey;
