@@ -1,5 +1,6 @@
 package no.ntnu.idata2306.model;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -25,11 +26,13 @@ public class AdViews {
     private LocalDateTime viewed;
 
     @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name = "advertisement_id", referencedColumnName = "id")
     @Schema(description = "Advertisement associated with the view")
     private Advertisement advertisement;
 
     @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @Schema(description = "User who viewed the advertisement")
     private User user;

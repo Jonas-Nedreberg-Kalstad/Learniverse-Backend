@@ -77,7 +77,7 @@ public class User {
     private Set<PaymentCard> paymentCards = new LinkedHashSet<>();
 
     @ManyToOne
-    @JsonBackReference
+    @JsonManagedReference
     @JoinColumn(name = "provider_id")
     @Schema(description = "provider associated with the given user")
     private Provider provider;

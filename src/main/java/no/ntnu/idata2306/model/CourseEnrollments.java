@@ -1,6 +1,7 @@
 package no.ntnu.idata2306.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -57,17 +58,18 @@ public class CourseEnrollments {
 
     @ManyToOne
     @JoinColumn(name = "course_id", referencedColumnName = "id")
-    @JsonBackReference
+    @JsonManagedReference
     @Schema(description = "Course associated with the enrollment")
     private Course course;
 
     @ManyToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @JsonBackReference
+    @JsonManagedReference
     @Schema(description = "User associated with the enrollment")
     private User user;
 
     @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name = "orders_id", referencedColumnName = "id")
     @Schema(description = "Order associated with the enrollment")
     private Orders orders;

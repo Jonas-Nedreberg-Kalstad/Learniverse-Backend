@@ -1,6 +1,7 @@
 package no.ntnu.idata2306.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -60,6 +61,7 @@ public class Agreement {
     private String terminationClause;
 
     @ManyToOne
+    @JsonManagedReference
     @JoinColumn(name = "provider_id", referencedColumnName = "id")
     @Schema(description = "Provider associated with the agreement")
     private Provider provider;

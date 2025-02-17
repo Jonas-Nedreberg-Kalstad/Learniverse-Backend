@@ -1,5 +1,6 @@
 package no.ntnu.idata2306.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class OrderStatus {
     private String status;
 
     @OneToMany(mappedBy = "orderStatus")
+    @JsonBackReference
     @Schema(description = "Orders associated with the order status")
     private Set<Orders> orders = new LinkedHashSet<>();
 }

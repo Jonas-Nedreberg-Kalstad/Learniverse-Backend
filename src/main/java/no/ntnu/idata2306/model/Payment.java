@@ -1,6 +1,7 @@
 package no.ntnu.idata2306.model;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -35,13 +36,13 @@ public class Payment {
 
     @ManyToOne
     @JoinColumn(name = "payment_method_id", referencedColumnName = "id")
-    @JsonBackReference
+    @JsonManagedReference
     @Schema(description = "Payment method used")
     private PaymentMethod paymentMethod;
 
     @ManyToOne
     @JoinColumn(name = "payment_card_id", referencedColumnName = "id")
-    @JsonBackReference
+    @JsonManagedReference
     @Schema(description = "Payment card used")
     private PaymentCard paymentCard;
 }

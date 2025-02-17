@@ -3,6 +3,7 @@ package no.ntnu.idata2306;
 import lombok.extern.slf4j.Slf4j;
 import no.ntnu.idata2306.model.Role;
 import no.ntnu.idata2306.model.User;
+import no.ntnu.idata2306.repository.RoleRepository;
 import no.ntnu.idata2306.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
@@ -25,7 +26,7 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder passwordEncoder;
+    private RoleRepository roleRepository;
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
@@ -39,12 +40,15 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
             Role userRole = new Role();
             userRole.setRole("USER");
 
+            roleRepository.save(adminRole);
+            roleRepository.save(userRole);
+
             // Create users
             User adminUser = new User();
             adminUser.setFirstName("Admin");
             adminUser.setLastName("User");
             adminUser.setEmail("admin@example.com");
-            adminUser.setPassword(passwordEncoder.encode("adminpass"));
+            adminUser.setPassword(("adminpass"));
             adminUser.setCreated(LocalDateTime.now());
             adminUser.setDeleted(false);
             adminUser.setRoles(new LinkedHashSet<>(Set.of(adminRole)));
@@ -53,7 +57,7 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
             regularUser.setFirstName("Regular");
             regularUser.setLastName("User");
             regularUser.setEmail("user@example.com");
-            regularUser.setPassword(passwordEncoder.encode("userpass"));
+            regularUser.setPassword(("userpass"));
             regularUser.setCreated(LocalDateTime.now());
             regularUser.setDeleted(false);
             regularUser.setRoles(new LinkedHashSet<>(Set.of(userRole)));

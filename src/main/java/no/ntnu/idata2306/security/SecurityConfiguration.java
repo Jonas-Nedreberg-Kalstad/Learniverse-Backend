@@ -24,21 +24,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
 
     /**
-     * Service for retrieving user details from the database.
-     */
-    @Autowired
-    private UserDetailsService userDetailsService;
-    @Autowired
-    private JwtRequestFilter jwtFilter;
-
-    /**
      * Configures the authentication manager to use the user details service for loading user data from the database.
      *
      * @param auth the authentication manager builder
      * @throws Exception if an error occurs during configuration
      */
     @Autowired
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+    protected void configure(AuthenticationManagerBuilder auth, UserDetailsService userDetailsService) throws Exception {
         auth.userDetailsService(userDetailsService);
     }
 
@@ -54,7 +46,7 @@ public class SecurityConfiguration {
             summary = "Configure Authorization Filter Chain",
             description = "Sets up the authorization filter chain for the application, defining security rules and filters."
     )
-    public SecurityFilterChain configureAuthorizationFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain configureAuthorizationFilterChain(HttpSecurity http, JwtRequestFilter jwtFilter) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
@@ -64,7 +56,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/swagger-ui.html").hasAuthority("ADMIN")
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
