@@ -4,63 +4,49 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.ntnu.idata2306.dto.AuthenticateUserRequest;
-import no.ntnu.idata2306.dto.AuthenticateUserResponse;
-import no.ntnu.idata2306.security.JwtUtil;
+import lombok.extern.slf4j.Slf4j;
+import no.ntnu.idata2306.dto.UserResponseDto;
+import no.ntnu.idata2306.dto.UserSignUpDto;
+import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+@Slf4j
 @RestController
 @CrossOrigin()
+@RequestMapping("/api")
 @Tag(name = "User API", description = "Endpoints for user")
 public class UserController {
 
-    private final AuthenticationManager authenticationManager;
     private final UserService userService;
-    private final JwtUtil jwtUtil;
 
-    @Autowired
-    public UserController(AuthenticationManager authenticationManager, UserService userService, JwtUtil jwtUtil) {
-        this.authenticationManager = authenticationManager;
+    public UserController(UserService userService) {
         this.userService = userService;
-        this.jwtUtil = jwtUtil;
     }
 
     /**
-     * Handles HTTP POST requests to authenticate a user.
-     * This method verifies the user's credentials and returns a JWT token if authentication is successful.
+     * Creates a new user.
      *
-     * @param authenticationRequest the request body containing the user's email and password
-     * @return a ResponseEntity containing the JWT token if authentication is successful, or an error message if authentication fails
+     * @param userSignUpDto the DTO containing user sign-up information
+     * @return  ResponseEntity with the created UserResponseDto object and HTTP status
+     * @apiNote The password is not returned in the response for security reasons.
      */
-    @Operation(summary = "Authenticate user", description = "Authenticates a user and returns a JWT token.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Successfully authenticated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthenticateUserResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Invalid email or password")
-    })
-    @PostMapping("/api/authenticate")
-    public ResponseEntity<?> authenticateUser(@RequestBody AuthenticateUserRequest authenticationRequest) {
+    @Operation(summary = "Create a new user", description = "Creates a new user with the provided sign-up information.")
+    @ApiResponse(responseCode = "201", description = "User created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = User.class)))
+    @ApiResponse(responseCode = "400", description = "Invalid input, object invalid")
+    @PostMapping("/anonymous")
+    public ResponseEntity<UserResponseDto> createUser(@RequestBody UserSignUpDto userSignUpDto) {
         try {
-            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                    authenticationRequest.getEmail(),
-                    authenticationRequest.getPassword()));
-        } catch (BadCredentialsException e) {
-            return new ResponseEntity<>("Invalid email or password", HttpStatus.UNAUTHORIZED);
+            User createdUser = userService.createUser(userSignUpDto);
+            log.info("User created with ID: {}", createdUser.getId());
+            UserResponseDto userResponse = new UserResponseDto(createdUser);
+            return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
+        } catch (Exception e) {
+            log.error("Error creating user", e);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-        final UserDetails userDetails = userService.loadUserByUsername(authenticationRequest.getEmail());
-        final String jwtToken = jwtUtil.generateToken(userDetails);
-        return ResponseEntity.ok(new AuthenticateUserResponse(jwtToken));
     }
 }

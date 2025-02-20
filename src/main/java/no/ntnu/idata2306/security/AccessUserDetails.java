@@ -27,6 +27,11 @@ public class AccessUserDetails implements UserDetails {
         this.convertRoles(user.getRoles());
     }
 
+    /**
+     * Convert roles to SimpleGrantedAuthority adding them to authorities list
+     *
+     * @param roles roles to convert
+     */
     private void convertRoles(Set<Role> roles) {
         authorities.clear();
         for (Role role : roles) {

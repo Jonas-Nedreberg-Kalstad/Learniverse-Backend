@@ -8,6 +8,7 @@ import no.ntnu.idata2306.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -22,11 +23,16 @@ import java.util.Set;
 @Component
 public class DummyDataInitializer implements ApplicationListener<ApplicationEvent> {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    private RoleRepository roleRepository;
+    public DummyDataInitializer(UserRepository userRepository, RoleRepository roleRepository, @Lazy PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Override
     public void onApplicationEvent(ApplicationEvent event) {
@@ -48,7 +54,7 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
             adminUser.setFirstName("Admin");
             adminUser.setLastName("User");
             adminUser.setEmail("admin@example.com");
-            adminUser.setPassword(("adminpass"));
+            adminUser.setPassword(this.passwordEncoder.encode("adminpass"));
             adminUser.setCreated(LocalDateTime.now());
             adminUser.setDeleted(false);
             adminUser.setRoles(new LinkedHashSet<>(Set.of(adminRole)));
@@ -57,7 +63,7 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
             regularUser.setFirstName("Regular");
             regularUser.setLastName("User");
             regularUser.setEmail("user@example.com");
-            regularUser.setPassword(("userpass"));
+            regularUser.setPassword(this.passwordEncoder.encode("userpass"));
             regularUser.setCreated(LocalDateTime.now());
             regularUser.setDeleted(false);
             regularUser.setRoles(new LinkedHashSet<>(Set.of(userRole)));
