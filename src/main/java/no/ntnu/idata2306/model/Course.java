@@ -1,5 +1,6 @@
 package no.ntnu.idata2306.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -112,6 +113,11 @@ public class Course {
     @JsonManagedReference
     @Schema(description = "user that updated the course")
     private User updatedBy;
+
+    @OneToMany(mappedBy = "course")
+    @JsonBackReference
+    @Schema(description = "reviews the course has gotten")
+    private Set<Review> reviews = new LinkedHashSet<>();
 
     @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)

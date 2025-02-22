@@ -79,6 +79,11 @@ public class User {
     @Schema(description = "payment cards with the given user")
     private Set<PaymentCard> paymentCards = new LinkedHashSet<>();
 
+    @OneToMany(mappedBy = "user")
+    @JsonBackReference
+    @Schema(description = "reviews the user has given")
+    private Set<Review> reviews = new LinkedHashSet<>();
+
     @ManyToOne
     @JsonManagedReference
     @JoinColumn(name = "provider_id")
