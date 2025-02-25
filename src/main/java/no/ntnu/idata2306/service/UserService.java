@@ -1,6 +1,7 @@
 package no.ntnu.idata2306.service;
 
 import lombok.extern.slf4j.Slf4j;
+import no.ntnu.idata2306.dto.UserResponseDto;
 import no.ntnu.idata2306.dto.UserSignUpDto;
 import no.ntnu.idata2306.dto.UserUpdateDto;
 import no.ntnu.idata2306.model.Role;
@@ -18,7 +19,9 @@ import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -55,17 +58,28 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * Retrieves all users from the repository and converts them to UserResponseDto objects.
+     *
+     * @return a list of UserResponseDto objects representing all users.
+     */
+    public List<UserResponseDto> getAll() {
+        return this.userRepository.findAll().stream()
+                .map(UserResponseDto::new)
+                .toList();
+    }
+
+    /**
      * Creates a new user with the provided sign-up information.
      *
      * @param userSignUpDto the DTO containing the user's sign-up information
-     * @return the newly created User object
+     * @return the newly created UserResponseDto object
      */
-    public User createUser(UserSignUpDto userSignUpDto){
+    public UserResponseDto createUser(UserSignUpDto userSignUpDto){
         User user = new User(userSignUpDto);
         user.setPassword(this.passwordEncoder.encode(user.getPassword()));
         setRole(user, AuthorityLevel.USER);
         this.userRepository.save(user);
-        return user;
+        return new UserResponseDto(user);
     }
 
     /**
@@ -73,10 +87,10 @@ public class UserService implements UserDetailsService {
      *
      * @param id the ID of the user to be updated
      * @param userUpdateDto the DTO containing the updated user update information
-     * @return the updated User object
+     * @return the updated UserResponseDto object
      * @throws RuntimeException if the user with the specified ID is not found
      */
-    public User updateUser(int id, UserUpdateDto userUpdateDto) {
+    public UserResponseDto updateUser(int id, UserUpdateDto userUpdateDto) {
         User user = findUserById(id);
 
         user.setFirstName(userUpdateDto.getFirstName());
@@ -87,20 +101,23 @@ public class UserService implements UserDetailsService {
 
         userRepository.save(user);
         log.info("User was updated successfully with ID: {}", id);
-        return user;
+        return new UserResponseDto(user);
     }
 
     /**
      * Marks a user as deleted by setting the deleted field to true.
      *
      * @param id the ID of the user to be marked as deleted
+     * @return UserResponseDto containing the updated user information
      * @throws RuntimeException if the user with the specified ID is not found
      */
-    public void softDeleteUser(int id) {
+    public UserResponseDto softDeleteUser(int id) {
         User user = findUserById(id);
         user.setDeleted(true);
         this.userRepository.save(user);
         log.info("User marked as deleted with ID: {}", id);
+
+        return new UserResponseDto(user);
     }
 
     /**
@@ -118,6 +135,13 @@ public class UserService implements UserDetailsService {
                 });
     }
 
+    /**
+     * Assigns a role to a user.
+     *
+     * @param user the user to whom the role will be assigned
+     * @param roleName the name of the role to be assigned
+     * @throws IllegalArgumentException if the specified role is not found
+     */
     public void setRole(User user, String roleName){
         Role userRole = this.roleRepository.findByRole(roleName).orElseThrow(() -> new IllegalArgumentException("Role " + roleName + " not found"));
         user.getRoles().add(userRole);
@@ -138,7 +162,7 @@ public class UserService implements UserDetailsService {
             return new AccessUserDetails(user.get());
         } else {
             log.error("Failed to load user details: User with email {} not found.", email);
-            throw new IllegalArgumentException("No user found with the provided email address: " + email);
+            throw new UsernameNotFoundException("No user found with the provided email address: " + email);
         }
     }
 

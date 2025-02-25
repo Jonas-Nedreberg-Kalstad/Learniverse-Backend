@@ -48,7 +48,7 @@ public class AuthenticationController {
             @ApiResponse(responseCode = "200", description = "Successfully authenticated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthenticateUserResponseDto.class))),
             @ApiResponse(responseCode = "401", description = "Invalid email or password")
     })
-    @PostMapping("/authenticate")
+    @PostMapping("/anonymous/authenticate")
     public ResponseEntity<?> authenticateUser(@RequestBody AuthenticateUserRequestDto authenticationRequest) {
         try {
             authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
