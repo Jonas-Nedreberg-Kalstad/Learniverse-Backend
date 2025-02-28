@@ -1,5 +1,6 @@
 package no.ntnu.idata2306.service;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import no.ntnu.idata2306.dto.UserResponseDto;
 import no.ntnu.idata2306.dto.UserSignUpDto;
@@ -15,13 +16,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -58,13 +57,24 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Retrieves all users from the repository and converts them to UserResponseDto objects.
+     * Retrieves all users from the repository and converts them to UserResponseDto objects to not include password.
      *
      * @return a list of UserResponseDto objects representing all users.
      */
     public List<UserResponseDto> getAll() {
         return this.userRepository.findAll().stream()
                 .map(UserResponseDto::new)
+                .toList();
+    }
+
+    /**
+     * Retrieves all users from the repository that is not deleted and converts them to UserResponseDto objects.
+     *
+     * @return a list of UserResponseDto objects representing all users.
+     */
+    public List<UserResponseDto> getAllActiveUsers(){
+        return this.userRepository.findByDeletedFalse().stream()
+                .map(UserResponseDto:: new)
                 .toList();
     }
 
@@ -88,7 +98,6 @@ public class UserService implements UserDetailsService {
      * @param id the ID of the user to be updated
      * @param userUpdateDto the DTO containing the updated user update information
      * @return the updated UserResponseDto object
-     * @throws RuntimeException if the user with the specified ID is not found
      */
     public UserResponseDto updateUser(int id, UserUpdateDto userUpdateDto) {
         User user = findUserById(id);
@@ -109,7 +118,6 @@ public class UserService implements UserDetailsService {
      *
      * @param id the ID of the user to be marked as deleted
      * @return UserResponseDto containing the updated user information
-     * @throws RuntimeException if the user with the specified ID is not found
      */
     public UserResponseDto softDeleteUser(int id) {
         User user = findUserById(id);
@@ -125,13 +133,13 @@ public class UserService implements UserDetailsService {
      *
      * @param id the ID of the user to be found
      * @return the User object if found
-     * @throws RuntimeException if the user with the specified ID is not found
+     * @throws EntityNotFoundException if the user with the specified ID is not found
      */
     public User findUserById(int id) {
         return this.userRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("User not found with ID: {}", id);
-                    return new RuntimeException("User not found with ID: " + id);
+                    return new EntityNotFoundException("User not found with ID: " + id);
                 });
     }
 

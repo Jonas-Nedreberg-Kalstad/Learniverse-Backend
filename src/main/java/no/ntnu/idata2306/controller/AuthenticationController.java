@@ -46,7 +46,9 @@ public class AuthenticationController {
     @Operation(summary = "Authenticate user", description = "Authenticates a user and returns a JWT token.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully authenticated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthenticateUserResponseDto.class))),
-            @ApiResponse(responseCode = "401", description = "Invalid email or password")
+            @ApiResponse(responseCode = "400", description = "Validation error (handled by global exception handler)"),
+            @ApiResponse(responseCode = "401", description = "Invalid email or password"),
+            @ApiResponse(responseCode = "500", description = "Internal server error (handled by global exception handler)")
     })
     @PostMapping("/anonymous/authenticate")
     public ResponseEntity<?> authenticateUser(@RequestBody AuthenticateUserRequestDto authenticationRequest) {

@@ -40,7 +40,7 @@ public class User {
     @Schema(description = "Last name of the user")
     private String lastName;
 
-    @Column(name = "email", nullable = false, unique = true, updatable = false)
+    @Column(name = "email", nullable = false, unique = true)
     @Schema(description = "Email of the user")
     private String email;
 
