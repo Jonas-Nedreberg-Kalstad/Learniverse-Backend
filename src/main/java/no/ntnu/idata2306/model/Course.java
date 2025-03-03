@@ -1,7 +1,7 @@
 package no.ntnu.idata2306.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,6 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Course.class)
 @Schema(description = "course of a given provider.", name = "course")
 @Entity
 public class Course {
@@ -74,52 +75,60 @@ public class Course {
 
     @ManyToOne
     @JoinColumn(name = "category_id", referencedColumnName = "id")
-    @JsonManagedReference
     @Schema(description = "Category of the given course")
     private Category category;
 
     @ManyToOne
     @JoinColumn(name = "credit_id", referencedColumnName = "id")
-    @JsonManagedReference
-    @Schema(description = "credit of the given course")
+    @Schema(description = "Credit of the given course")
     private Credit credit;
 
     @ManyToOne
     @JoinColumn(name = "currency_id", referencedColumnName = "id")
-    @JsonManagedReference
-    @Schema(description = "currency of the given price")
+    @Schema(description = "Currency of the given price")
     private Currency currency;
 
     @ManyToOne
     @JoinColumn(name = "difficulty_level_id", referencedColumnName = "id")
-    @JsonManagedReference
-    @Schema(description = "difficulty level of the given course")
+    @Schema(description = "Difficulty level of the given course")
     private DifficultyLevel difficultyLevel;
 
     @ManyToOne
     @JoinColumn(name = "hours_per_week_id", referencedColumnName = "id")
-    @JsonManagedReference
-    @Schema(description = "hours per week of the given course")
+    @Schema(description = "Hours per week of the given course")
     private HoursPerWeek hoursPerWeek;
 
     @ManyToOne
     @JoinColumn(name = "created_by", referencedColumnName = "id")
-    @JsonManagedReference
-    @Schema(description = "user that created the course")
+    @Schema(description = "User that created the course")
     private User createdBy;
 
     @ManyToOne
     @JoinColumn(name = "updated_by", referencedColumnName = "id")
-    @JsonManagedReference
-    @Schema(description = "user that updated the course")
+    @Schema(description = "User that updated the course")
     private User updatedBy;
 
+    @ManyToOne
+    @JoinColumn(name = "provider_id", referencedColumnName = "id")
+    @Schema(description = "Provider that owns the course")
+    private Provider provider;
+
     @OneToMany(mappedBy = "course")
-    @JsonBackReference
-    @Schema(description = "reviews the course has gotten")
+    @Schema(description = "Reviews the course has gotten")
     private Set<Review> reviews = new LinkedHashSet<>();
 
-    @JsonManagedReference
+    @OneToMany(mappedBy = "course")
+    @Schema(description = "Course enrollments the course has gotten")
+    private Set<CourseEnrollments> courseEnrollments = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "course")
+    @Schema(description = "Orders the course has gotten")
+    private Set<Orders> orders = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "course")
+    @Schema(description = "Advertisements the course has")
+    private Set<Advertisement> advertisements = new LinkedHashSet<>();
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "course_topic",
             joinColumns = @JoinColumn(name = "course_id", referencedColumnName = "id"),
@@ -128,7 +137,6 @@ public class Course {
     @Schema(description = "Topic(s) of a given course")
     private Set<Topic> topics = new LinkedHashSet<>();
 
-    @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "course_related_certificate",
             joinColumns = @JoinColumn(name = "course_id", referencedColumnName = "id"),

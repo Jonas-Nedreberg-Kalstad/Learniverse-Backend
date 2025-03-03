@@ -1,7 +1,6 @@
 package no.ntnu.idata2306.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -9,9 +8,9 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import no.ntnu.idata2306.dto.UserResponseDto;
-import no.ntnu.idata2306.dto.UserSignUpDto;
-import no.ntnu.idata2306.dto.UserUpdateDto;
+import no.ntnu.idata2306.dto.user.UserResponseDto;
+import no.ntnu.idata2306.dto.user.UserSignUpDto;
+import no.ntnu.idata2306.dto.user.UserUpdateDto;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -22,6 +21,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = User.class)
 @Schema(description = "User of the application", name = "User")
 @Entity
 public class User {
@@ -65,32 +65,26 @@ public class User {
     private boolean deleted;
 
     @OneToMany(mappedBy = "createdBy")
-    @JsonBackReference
     @Schema(description = "courses with the given user")
     private Set<Course> createdCourses = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "updatedBy")
-    @JsonBackReference
     @Schema(description = "courses with the given user")
     private Set<Course> updatedCourses = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
-    @JsonBackReference
     @Schema(description = "payment cards with the given user")
     private Set<PaymentCard> paymentCards = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "user")
-    @JsonBackReference
     @Schema(description = "reviews the user has given")
     private Set<Review> reviews = new LinkedHashSet<>();
 
     @ManyToOne
-    @JsonManagedReference
     @JoinColumn(name = "provider_id")
     @Schema(description = "provider associated with the given user")
     private Provider provider;
 
-    @JsonManagedReference
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "user_role",
             joinColumns = @JoinColumn(name = "user_id", referencedColumnName = "id"),

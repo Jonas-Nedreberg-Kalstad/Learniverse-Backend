@@ -1,6 +1,7 @@
 package no.ntnu.idata2306.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -14,6 +15,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Provider.class)
 @Schema(description = "Provider details", name = "provider")
 @Entity
 public class Provider {
@@ -45,12 +47,14 @@ public class Provider {
     private LocalDateTime updated;
 
     @OneToMany(mappedBy = "provider")
-    @JsonBackReference
     @Schema(description = "agreements associated with the provider")
     private Set<Agreement> agreements = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "provider", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonBackReference
     @Schema(description = "users associated with the provider")
     private Set<User> users = new LinkedHashSet<>();
+
+    @OneToMany(mappedBy = "provider")
+    @Schema(description = "courses associated with the provider")
+    private Set<Course> courses = new LinkedHashSet<>();
 }

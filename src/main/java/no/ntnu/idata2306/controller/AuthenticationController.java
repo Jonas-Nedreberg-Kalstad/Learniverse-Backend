@@ -6,8 +6,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import no.ntnu.idata2306.dto.AuthenticateUserRequestDto;
-import no.ntnu.idata2306.dto.AuthenticateUserResponseDto;
+import no.ntnu.idata2306.dto.authentication.AuthenticateUserRequestDto;
+import no.ntnu.idata2306.dto.authentication.AuthenticateUserResponseDto;
 import no.ntnu.idata2306.security.JwtUtil;
 import no.ntnu.idata2306.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,6 +39,7 @@ public class AuthenticationController {
     /**
      * Handles HTTP POST requests to authenticate a user.
      * This method verifies the user's credentials and returns a JWT token if authentication is successful.
+     * Error code 500 is handled by global exception handler.
      *
      * @param authenticationRequest the request body containing the user's email and password
      * @return a ResponseEntity containing the JWT token if authentication is successful, or an error message if authentication fails
@@ -46,9 +47,8 @@ public class AuthenticationController {
     @Operation(summary = "Authenticate user", description = "Authenticates a user and returns a JWT token.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Successfully authenticated", content = @Content(mediaType = "application/json", schema = @Schema(implementation = AuthenticateUserResponseDto.class))),
-            @ApiResponse(responseCode = "400", description = "Validation error (handled by global exception handler)"),
             @ApiResponse(responseCode = "401", description = "Invalid email or password"),
-            @ApiResponse(responseCode = "500", description = "Internal server error (handled by global exception handler)")
+            @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/anonymous/authenticate")
     public ResponseEntity<?> authenticateUser(@RequestBody AuthenticateUserRequestDto authenticationRequest) {

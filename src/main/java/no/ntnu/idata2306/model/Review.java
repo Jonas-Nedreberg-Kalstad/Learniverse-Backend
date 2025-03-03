@@ -1,6 +1,7 @@
 package no.ntnu.idata2306.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Review.class)
 @Schema(description = "Review of a course", name = "Review")
 @Entity
 public class Review {
@@ -44,13 +46,11 @@ public class Review {
     private boolean reported;
 
     @ManyToOne
-    @JsonManagedReference
     @JoinColumn(name = "user_id", nullable = false)
     @Schema(description = "User who wrote the review")
     private User user;
 
     @ManyToOne
-    @JsonManagedReference
     @JoinColumn(name = "course_id", nullable = false)
     @Schema(description = "Course that the review is about")
     private Course course;

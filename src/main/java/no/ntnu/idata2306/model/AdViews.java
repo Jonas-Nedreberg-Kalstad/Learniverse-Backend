@@ -1,6 +1,7 @@
 package no.ntnu.idata2306.model;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -11,6 +12,7 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = AdViews.class)
 @Schema(description = "Advertisement views details", name = "ad_views")
 @Entity
 public class AdViews {
@@ -26,13 +28,11 @@ public class AdViews {
     private LocalDateTime viewed;
 
     @ManyToOne
-    @JsonManagedReference
     @JoinColumn(name = "advertisement_id", referencedColumnName = "id")
     @Schema(description = "Advertisement associated with the view")
     private Advertisement advertisement;
 
     @ManyToOne
-    @JsonManagedReference
     @JoinColumn(name = "user_id", referencedColumnName = "id")
     @Schema(description = "User who viewed the advertisement")
     private User user;

@@ -2,9 +2,9 @@ package no.ntnu.idata2306.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import no.ntnu.idata2306.dto.UserResponseDto;
-import no.ntnu.idata2306.dto.UserSignUpDto;
-import no.ntnu.idata2306.dto.UserUpdateDto;
+import no.ntnu.idata2306.dto.user.UserResponseDto;
+import no.ntnu.idata2306.dto.user.UserSignUpDto;
+import no.ntnu.idata2306.dto.user.UserUpdateDto;
 import no.ntnu.idata2306.model.Role;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.repository.RoleRepository;
@@ -13,6 +13,9 @@ import no.ntnu.idata2306.security.AccessUserDetails;
 import no.ntnu.idata2306.security.AuthorityLevel;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -43,17 +46,6 @@ public class UserService implements UserDetailsService {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleRepository = roleRepository;
-    }
-
-
-    /**
-     * Retrieves a user by their unique ID.
-     *
-     * @param id the unique identifier of the user
-     * @return an Optional containing the user if found, or an empty Optional if no user is found with the given ID
-     */
-    public Optional<User> getUserById(int id) {
-        return this.userRepository.findById(id);
     }
 
     /**
@@ -100,7 +92,7 @@ public class UserService implements UserDetailsService {
      * @return the updated UserResponseDto object
      */
     public UserResponseDto updateUser(int id, UserUpdateDto userUpdateDto) {
-        User user = findUserById(id);
+        User user = getUserById(id);
 
         user.setFirstName(userUpdateDto.getFirstName());
         user.setLastName(userUpdateDto.getLastName());
@@ -120,7 +112,7 @@ public class UserService implements UserDetailsService {
      * @return UserResponseDto containing the updated user information
      */
     public UserResponseDto softDeleteUser(int id) {
-        User user = findUserById(id);
+        User user = getUserById(id);
         user.setDeleted(true);
         this.userRepository.save(user);
         log.info("User marked as deleted with ID: {}", id);
@@ -135,7 +127,7 @@ public class UserService implements UserDetailsService {
      * @return the User object if found
      * @throws EntityNotFoundException if the user with the specified ID is not found
      */
-    public User findUserById(int id) {
+    public User getUserById(int id) {
         return this.userRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("User not found with ID: {}", id);
@@ -148,11 +140,24 @@ public class UserService implements UserDetailsService {
      *
      * @param user the user to whom the role will be assigned
      * @param roleName the name of the role to be assigned
-     * @throws IllegalArgumentException if the specified role is not found
+     * @throws EntityNotFoundException if the specified role is not found
      */
     public void setRole(User user, String roleName){
-        Role userRole = this.roleRepository.findByRole(roleName).orElseThrow(() -> new IllegalArgumentException("Role " + roleName + " not found"));
+        Role userRole = this.roleRepository.findByRole(roleName).orElseThrow(() -> new EntityNotFoundException("Role " + roleName + " not found"));
         user.getRoles().add(userRole);
+    }
+
+    /**
+     * Returns the user of the curren session.
+     *
+     * @return user of current session.
+     * @throws EntityNotFoundException if no user is found with the given email address
+     */
+    public User getSessionUser() {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        Authentication authentication = securityContext.getAuthentication();
+        String email = authentication.getName();
+        return this.userRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("User with email: " + email + " was not found"));
     }
 
     /**
@@ -161,17 +166,17 @@ public class UserService implements UserDetailsService {
      *
      * @param email the email address of the user to be retrieved
      * @return UserDetails containing the user's information and authorities
-     * @throws UsernameNotFoundException if no user is found with the given email address
+     * @throws EntityNotFoundException if no user is found with the given email address
      */
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<User> user = this.userRepository.findByEmail(email);
-        if (user.isPresent()) {
-            return new AccessUserDetails(user.get());
-        } else {
+    public UserDetails loadUserByUsername(String email) throws EntityNotFoundException {
+        User user = this.userRepository.findByEmail(email).orElseThrow(() -> {
             log.error("Failed to load user details: User with email {} not found.", email);
-            throw new UsernameNotFoundException("No user found with the provided email address: " + email);
-        }
+            return new EntityNotFoundException("No user found with the provided email address: " + email);
+        });
+        
+        return new AccessUserDetails(user);
+
     }
 
 }

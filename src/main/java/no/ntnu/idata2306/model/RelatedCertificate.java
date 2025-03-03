@@ -1,7 +1,7 @@
 package no.ntnu.idata2306.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -16,6 +16,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = RelatedCertificate.class)
 @Schema(description = "Related certificate which courses may have.", name = "related_certificate")
 @Entity
 public class RelatedCertificate {
@@ -30,7 +31,6 @@ public class RelatedCertificate {
     @Schema(description = "related certificate certificateName")
     private String certificateName;
 
-    @JsonManagedReference
     @ManyToMany(mappedBy = "relatedCertificates")
     @Schema(description = "Courses with the given relatedCertificate(s)")
     private Set<Course> courses = new LinkedHashSet<>();

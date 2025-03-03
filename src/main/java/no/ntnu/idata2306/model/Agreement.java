@@ -1,7 +1,7 @@
 package no.ntnu.idata2306.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
@@ -16,6 +16,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Agreement.class)
 @Schema(description = "Agreement details", name = "agreement")
 @Entity
 public class Agreement {
@@ -61,13 +62,11 @@ public class Agreement {
     private String terminationClause;
 
     @ManyToOne
-    @JsonManagedReference
     @JoinColumn(name = "provider_id", referencedColumnName = "id")
     @Schema(description = "Provider associated with the agreement")
     private Provider provider;
 
     @OneToMany(mappedBy = "agreement")
-    @JsonBackReference
-    @Schema(description = "advertisements associated with the agreement")
+    @Schema(description = "Advertisements associated with the agreement")
     private Set<Advertisement> advertisements = new LinkedHashSet<>();
 }

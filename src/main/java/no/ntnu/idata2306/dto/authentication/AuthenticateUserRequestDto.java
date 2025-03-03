@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.dto;
+package no.ntnu.idata2306.dto.authentication;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

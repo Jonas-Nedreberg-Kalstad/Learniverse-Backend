@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.dto;
+package no.ntnu.idata2306.dto.user;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -9,15 +9,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 /**
- * Data Transfer Object for updating user information.
+ * Data Transfer Object for user signup.
  * Includes validation for null/blank values, length, and email format.
  */
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserUpdateDto {
-
+public class UserSignUpDto {
 
     @NotBlank(message = "First name cannot be blank")
     @Size(min = 1, max = 50, message = "First name must be between 1 and 50 characters")
