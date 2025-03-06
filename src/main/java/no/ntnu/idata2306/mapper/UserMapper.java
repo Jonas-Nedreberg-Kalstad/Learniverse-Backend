@@ -29,7 +29,7 @@ public interface UserMapper {
      * @param signUpDto the DTO containing user sign-up information
      * @return the User entity
      */
-    @Mapping(target = "password", ignore = true) // Ignore password mapping initially
+    @Mapping(target = "password", ignore = true)
     User userSignupDtoToUser(UserSignUpDto signUpDto);
 
     /**
@@ -59,7 +59,7 @@ public interface UserMapper {
      * @param userUpdateDto the DTO containing user update information
      * @param user the User entity to be updated
      */
-    @Mapping(target = "password", ignore = true) // Ignore password mapping initially
+    @Mapping(target = "password", ignore = true)
     void updateUserFromDto(UserUpdateDto userUpdateDto, @MappingTarget User user);
 
     /**

@@ -32,6 +32,7 @@ public interface CourseMapper {
      * Converts an UpdateCourseDto to a Course entity.
      *
      * @param updateCourseDto the DTO containing course update information
+     * @param course the Course entity to be updated
      */
     void updateCourseFromDto(UpdateCourseDto updateCourseDto, @MappingTarget Course course);
 

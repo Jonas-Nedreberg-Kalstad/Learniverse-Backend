@@ -52,12 +52,12 @@ public class Agreement {
     private LocalDateTime updated;
 
     @Lob
-    @Column(name = "agreement_details", nullable = true)
+    @Column(name = "agreement_details", nullable = true, columnDefinition = "TEXT")
     @Schema(description = "Details of the agreement")
     private String agreementDetails;
 
     @Lob
-    @Column(name = "termination_clause", nullable = true)
+    @Column(name = "termination_clause", nullable = true, columnDefinition = "TEXT")
     @Schema(description = "Termination clause of the agreement")
     private String terminationClause;
 

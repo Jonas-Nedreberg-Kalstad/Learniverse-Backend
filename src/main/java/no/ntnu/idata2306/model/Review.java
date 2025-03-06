@@ -29,7 +29,7 @@ public class Review {
     private int rating;
 
     @Lob // for larger objects
-    @Column(name = "review", nullable = false)
+    @Column(name = "review", nullable = false, columnDefinition = "TEXT")
     @Schema(description = "Text of the review")
     private String review;
 

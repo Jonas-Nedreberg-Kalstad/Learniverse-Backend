@@ -36,12 +36,12 @@ public class Course {
     private BigDecimal price;
 
     @Lob // for larger objects
-    @Column(name = "description", nullable = true)
+    @Column(name = "description", nullable = true, columnDefinition = "TEXT")
     @Schema(description = "course description")
     private String description;
 
     @Lob // for larger objects
-    @Column(name = "requirement_description", nullable = true)
+    @Column(name = "requirement_description", nullable = true, columnDefinition = "TEXT")
     @Schema(description = "course requirement description")
     private String requirementDescription;
 

@@ -50,17 +50,23 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Handles HttpMediaTypeNotSupportedException and returns a response with an error message.
+     *
+     * @param ex the HttpMediaTypeNotSupportedException thrown when the media type is not supported
+     * @return ResponseEntity containing the error details, with HTTP status 415 (Unsupported Media Type)
+     */
     @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
     @ResponseStatus(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
     public ResponseEntity<Map<String, Object>> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex) {
-        log.error("Unsupported media type: ", ex);
 
         Map<String, Object> errorDetails = new HashMap<>();
         errorDetails.put("timestamp", LocalDateTime.now());
-        errorDetails.put("message", "Unsupported media type. Please ensure the Content-Type header is set to 'application/json'.");
+        errorDetails.put("message", "Unsupported media type. Please ensure the Content-Type header is set to 'application/json', and that data sent is of correct format.");
         errorDetails.put("details", ex.getMessage());
         errorDetails.put("errorCode", "UNSUPPORTED_MEDIA_TYPE");
 
+        log.error("Unsupported media type: ", ex);
         return new ResponseEntity<>(errorDetails, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
     }
 
