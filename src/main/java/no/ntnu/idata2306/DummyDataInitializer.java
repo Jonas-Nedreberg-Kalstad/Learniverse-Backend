@@ -15,6 +15,8 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
+import static org.hibernate.annotations.UuidGenerator.Style.RANDOM;
+
 /**
  * Responsible for populating database with dummy data for testing.
  */
@@ -22,6 +24,7 @@ import java.util.*;
 @Component
 public class DummyDataInitializer implements ApplicationListener<ApplicationEvent> {
 
+    private static final Random RANDOM = new Random();
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final CourseRepository courseRepository;
@@ -34,11 +37,14 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
     private  final RelatedCertificateRepository relatedCertificateRepository;
     private final TopicRepository topicRepository;
 
+    private final ReviewRepository reviewRepository;
+
     @Autowired
     public DummyDataInitializer(UserRepository userRepository, RoleRepository roleRepository, CourseRepository courseRepository,
                                 CategoryRepository categoryRepository, CreditRepository creditRepository, CurrencyRepository currencyRepository,
                                 DifficultyLevelRepository difficultyLevelRepository, HoursPerWeekRepository hoursPerWeekRepository,
-                                @Lazy PasswordEncoder passwordEncoder, TopicRepository topicRepository, RelatedCertificateRepository relatedCertificateRepository) {
+                                @Lazy PasswordEncoder passwordEncoder, TopicRepository topicRepository, RelatedCertificateRepository relatedCertificateRepository,
+                                ReviewRepository reviewRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.courseRepository = courseRepository;
@@ -50,6 +56,7 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
         this.passwordEncoder = passwordEncoder;
         this.topicRepository = topicRepository;
         this.relatedCertificateRepository = relatedCertificateRepository;
+        this.reviewRepository = reviewRepository;
     }
 
     @Override
@@ -669,18 +676,32 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
                     .relatedCertificates(new HashSet<>(List.of(databricksCertification)))
                     .build();
 
-            courseRepository.save(javaCourse);
-            courseRepository.save(sqlCourse);
-            courseRepository.save(dotNetCourse);
-            courseRepository.save(azureFundamentalsCourse);
-            courseRepository.save(azureAdministrationCourse);
-            courseRepository.save(awsCloudPractitionerCourse);
-            courseRepository.save(seoCourse);
-            courseRepository.save(socialMediaMarketingCourse);
-            courseRepository.save(businessStrategyCourse);
-            courseRepository.save(machineLearningCourse);
-            courseRepository.save(imageRecognitionCourse);
-            courseRepository.save(databricksCourse);
+            // All courses
+            List<Course> courses = Arrays.asList(
+                    javaCourse, sqlCourse, dotNetCourse, azureFundamentalsCourse, azureAdministrationCourse,
+                    awsCloudPractitionerCourse, seoCourse, socialMediaMarketingCourse, businessStrategyCourse,
+                    machineLearningCourse, imageRecognitionCourse, databricksCourse
+            );
+
+            courseRepository.saveAll(courses);
+
+            // Reviews
+            courses.forEach(course -> {
+                for (int i = 0; i < 10; i++) {
+                    Review review = Review.builder()
+                            .rating(RANDOM.nextInt(5) + 1)
+                            .review("This is a dummy review for " + course.getCourseName())
+                            .created(LocalDateTime.now().minusDays(RANDOM.nextInt(365)))
+                            .helpfulVotes(RANDOM.nextInt(100))
+                            .reported(RANDOM.nextBoolean())
+                            .user(adminUser)
+                            .course(course)
+                            .build();
+
+                    reviewRepository.save(review);
+                }
+            });
+
         }
 
         log.info("Test data imported successfully.");

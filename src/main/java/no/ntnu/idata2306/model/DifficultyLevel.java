@@ -1,6 +1,7 @@
 package no.ntnu.idata2306.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -17,6 +18,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = DifficultyLevel.class)
+@JsonIgnoreProperties("courses")
 @Schema(description = "difficultyLevel of a course.", name = "difficulty_level")
 @Entity
 public class DifficultyLevel {

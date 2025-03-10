@@ -7,6 +7,7 @@ import no.ntnu.idata2306.dto.course.CreateCourseDto;
 import no.ntnu.idata2306.dto.course.UpdateCourseDto;
 import no.ntnu.idata2306.mapper.CourseMapper;
 import no.ntnu.idata2306.model.Course;
+import no.ntnu.idata2306.model.Review;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,6 +97,19 @@ public class CourseService {
         course.setActive(false);
         this.courseRepository.save(course);
         return CourseMapper.INSTANCE.courseToResponseCourseDto(course);
+    }
+
+    /**
+     * Calculates the average rating of the reviews for a given course.
+     *
+     * @param course the Course object whose reviews' average rating is to be calculated
+     * @return the average rating of the reviews
+     */
+    public double calculatesRatingAverage(Course course){
+        double sum = course.getReviews().stream()
+                .mapToDouble(Review::getRating)
+                .sum();
+        return sum / course.getReviews().size();
     }
 
     /**

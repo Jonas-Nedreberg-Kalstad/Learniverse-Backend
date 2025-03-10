@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.security;
+package no.ntnu.idata2306.util;
 
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
@@ -11,8 +11,6 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 /**
@@ -21,7 +19,7 @@ import java.util.function.Function;
 @Component
 public class JwtUtil {
 
-    @Value("${JWT_SECRET_KEY}")
+    @Value("${JWTSECRET}")
     private String SECRET_KEY;
     private static final String JWT_AUTH_KEY = "roles";
 

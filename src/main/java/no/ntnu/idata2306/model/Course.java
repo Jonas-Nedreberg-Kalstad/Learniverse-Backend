@@ -1,6 +1,7 @@
 package no.ntnu.idata2306.model;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -17,6 +18,7 @@ import java.util.Set;
 @AllArgsConstructor
 @Builder
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Course.class)
+@JsonIgnoreProperties("reviews")
 @Schema(description = "course of a given provider.", name = "course")
 @Entity
 public class Course {
@@ -116,18 +118,6 @@ public class Course {
     @OneToMany(mappedBy = "course")
     @Schema(description = "Reviews the course has gotten")
     private Set<Review> reviews = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "course")
-    @Schema(description = "Course enrollments the course has gotten")
-    private Set<CourseEnrollments> courseEnrollments = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "course")
-    @Schema(description = "Orders the course has gotten")
-    private Set<Orders> orders = new LinkedHashSet<>();
-
-    @OneToMany(mappedBy = "course")
-    @Schema(description = "Advertisements the course has")
-    private Set<Advertisement> advertisements = new LinkedHashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "course_topic",

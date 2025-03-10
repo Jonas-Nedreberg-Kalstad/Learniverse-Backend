@@ -35,6 +35,7 @@ public class GlobalExceptionHandler {
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.computeIfAbsent(error.getField(), k -> new ArrayList<>()).add(error.getDefaultMessage());
         }
+        log.error("Bad Request: {}", errors);
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
     }
 

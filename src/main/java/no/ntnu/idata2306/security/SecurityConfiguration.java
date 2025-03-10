@@ -69,7 +69,7 @@ public class SecurityConfiguration {
             description = "Sets up the authorization filter chain for the application, defining security rules and filters."
     )
     public SecurityFilterChain configureAuthorizationFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable).cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasAuthority(AuthorityLevel.ADMIN)
                         .requestMatchers("/api/user/**").hasAnyAuthority(AuthorityLevel.ADMIN, AuthorityLevel.USER, AuthorityLevel.PROVIDER)

@@ -31,6 +31,9 @@ public class CourseResponseDto {
     private LocalDateTime created;
     private LocalDateTime updated;
     private boolean active;
+    private double averageRating;
+    private int numberOfReviews;
+
     private Category category;
     private Credit credit;
     private Currency currency;

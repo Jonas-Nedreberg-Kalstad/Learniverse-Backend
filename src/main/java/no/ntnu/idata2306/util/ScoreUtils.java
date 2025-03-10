@@ -1,0 +1,63 @@
+package no.ntnu.idata2306.util;
+
+import java.util.List;
+
+/**
+ * Utility class for scoring calculations.
+ */
+public class ScoreUtils {
+
+    /**
+     * Normalizes the score based on the Levenshtein distance between two strings.
+     * The score is calculated as follows:
+     * <ul>
+     *   <li>The Levenshtein distance is divided by the maximum length of the two strings to get a similarity ratio.</li>
+     *   <li>The similarity ratio is subtracted from 1 to get the dissimilarity ratio.</li>
+     *   <li>The dissimilarity ratio is multiplied by 100 to convert it to a percentage score.</li>
+     * </ul>
+     * This method ensures that the score is higher for strings that are more similar.
+     *
+     * @param distance  the Levenshtein distance between the two strings.
+     * @param maxLength the maximum length of the two strings.
+     * @return the normalized score as a percentage.
+     */
+    public static double normalizeScore(int distance, int maxLength) {
+        return (1.0 - (double) distance / maxLength) * 100;
+    }
+
+    /**
+     * Calculates the average normalized score for a list of words in the parent objects name
+     * against a list of words in the search parameter using the Levenshtein distance.
+     * The score for each word is calculated and the best score for each word in the parent objects name
+     * is averaged to get the final score.
+     * <p>
+     * The method gives extra weight to exact matches by assigning a full score of 100
+     * for words that match exactly, and uses the Levenshtein distance to calculate the score
+     * for partial matches.
+     * </p>
+     *
+     * @param correctWords the list of words in the parent objects name.
+     * @param searchWords the list of words in the search parameter.
+     * @return the average normalized score as a percentage.
+     */
+    public static double calculateAverageNormalizedScore(List<String> correctWords, List<String> searchWords) {
+        double totalScore = 0;
+        for (String correctWord : correctWords) {
+            double bestScore = 0;
+            for (String searchWord : searchWords) {
+                double score;
+                if (correctWord.equalsIgnoreCase(searchWord)) {
+                    score = 100; // Exact match gets full score
+                } else {
+                    int distance = StringUtils.levenshteinDistance(searchWord, correctWord);
+                    score = normalizeScore(distance, Math.max(searchWord.length(), correctWord.length()));
+                }
+                bestScore = Math.max(bestScore, score);
+            }
+            totalScore += bestScore;
+        }
+        return totalScore / correctWords.size();
+    }
+
+    private ScoreUtils(){}
+}
