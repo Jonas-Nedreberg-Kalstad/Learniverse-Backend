@@ -37,7 +37,7 @@ public class SearchController {
      *
      * @param criteria the search criteria containing the course name, category name, and topic name to search for
      * @param page     the page number to retrieve (default is 0)
-     * @param size     the number of records per page (default is 10)
+     * @param size     the number of records per page (default is 5)
      * @return ResponseEntity with the SearchResult object containing the scored courses, categories, and topics, along with pagination information
      */
     @Operation(summary = "Search for courses, categories, and topics", description = "Searches for courses, categories, and topics based on the provided search criteria. The results are paginated.")

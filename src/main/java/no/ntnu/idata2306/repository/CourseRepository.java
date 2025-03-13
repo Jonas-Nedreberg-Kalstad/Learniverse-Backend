@@ -128,4 +128,6 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
     Page<Course> findByTopicsIn(Collection<Set<Topic>> topics, Pageable pageable);
 
     List<Course> findByActiveTrue();
+
+    Page<Course> findByActiveTrue(Pageable pageable);
 }

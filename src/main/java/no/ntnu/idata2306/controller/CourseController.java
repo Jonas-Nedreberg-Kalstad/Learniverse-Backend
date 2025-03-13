@@ -17,6 +17,8 @@ import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.service.CourseService;
 import no.ntnu.idata2306.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -72,6 +74,27 @@ public class CourseController {
     @GetMapping("/user/activeCourses")
     public List<CourseResponseDto> getAllActiveCourses() {
         return courseService.getAllActiveCourses();
+    }
+
+    /**
+     * Retrieves a list of the most popular courses.
+     * Error code 404 and 500 is handled by global exception handler.
+     *
+     * @param page the page number to retrieve.
+     * @param size the size of the page to retrieve.
+     * @return a list of CourseResponseDto objects representing the most popular courses.
+     */
+    @Operation(summary = "Get most popular courses", description = "Retrieves a list of the most popular courses.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Courses retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CourseResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "Course(s) not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/anonymous/mostPopularCourses")
+    public List<CourseResponseDto> getMostPopularCourses(@RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return this.courseService.getMostPopularCourses(pageable);
     }
 
     /**

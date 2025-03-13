@@ -11,9 +11,12 @@ import no.ntnu.idata2306.model.Review;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.repository.CourseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -52,6 +55,52 @@ public class CourseService {
         return this.courseRepository.findByActiveTrue().stream()
                 .map(CourseMapper.INSTANCE::courseToResponseCourseDto)
                 .toList();
+    }
+
+    /**
+     * Retrieves all active courses from the repository based on pagination information.
+     *
+     * @param pageable the pagination information.
+     * @return a page of active Course entities.
+     */
+    private Page<Course> getActiveCourses(Pageable pageable) {
+        return this.courseRepository.findByActiveTrue(pageable);
+    }
+
+    /**
+     * Finds and returns the most popular active courses based on the average rating of their reviews within the pagination constraints.
+     *
+     * @param pageable the pagination information.
+     * @return a list of CourseResponseDto objects representing the most popular courses.
+     * @throws EntityNotFoundException if no active courses are found.
+     */
+    public List<CourseResponseDto> getMostPopularCourses(Pageable pageable) {
+        Page<Course> activeCourses = this.getActiveCourses(pageable);
+
+        List<Course> mostPopularCourses = activeCourses.stream()
+                .sorted(Comparator.comparingDouble(this::calculateAverageRating).reversed())
+                .toList();
+
+        if (mostPopularCourses.isEmpty()) {
+            throw new EntityNotFoundException("No active courses found");
+        }
+
+        return mostPopularCourses.stream()
+                .map(CourseMapper.INSTANCE::courseToResponseCourseDto)
+                .toList();
+    }
+
+    /**
+     * Calculates the average rating of a given course based on its reviews.
+     *
+     * @param course the Course entity for which to calculate the average rating.
+     * @return the average rating of the course, or 0 if there are no reviews.
+     */
+    private double calculateAverageRating(Course course) {
+        return course.getReviews().stream()
+                .mapToInt(Review::getRating)
+                .average()
+                .orElse(0);
     }
 
     /**
