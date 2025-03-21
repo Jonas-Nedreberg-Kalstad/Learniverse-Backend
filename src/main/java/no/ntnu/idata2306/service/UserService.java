@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.ntnu.idata2306.dto.user.UserResponseDto;
 import no.ntnu.idata2306.dto.user.UserSignUpDto;
 import no.ntnu.idata2306.dto.user.UserUpdateDto;
+import no.ntnu.idata2306.mapper.UserMapper;
 import no.ntnu.idata2306.model.Role;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.repository.RoleRepository;
@@ -18,12 +19,11 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Service
@@ -49,24 +49,24 @@ public class UserService implements UserDetailsService {
     }
 
     /**
-     * Retrieves all users from the repository and converts them to UserResponseDto objects to not include password.
+     * Retrieves all users from the repository and converts them to UserResponseDto objects.
      *
      * @return a list of UserResponseDto objects representing all users.
      */
     public List<UserResponseDto> getAll() {
         return this.userRepository.findAll().stream()
-                .map(UserResponseDto::new)
+                .map(UserMapper.INSTANCE::userToUserResponseDto)
                 .toList();
     }
 
     /**
-     * Retrieves all users from the repository that is not deleted and converts them to UserResponseDto objects.
+     * Retrieves all users from the repository that are not deleted and converts them to UserResponseDto objects.
      *
-     * @return a list of UserResponseDto objects representing all users.
+     * @return a list of UserResponseDto objects representing all active users.
      */
-    public List<UserResponseDto> getAllActiveUsers(){
+    public List<UserResponseDto> getAllActiveUsers() {
         return this.userRepository.findByDeletedFalse().stream()
-                .map(UserResponseDto:: new)
+                .map(UserMapper.INSTANCE::userToUserResponseDto)
                 .toList();
     }
 
@@ -76,33 +76,27 @@ public class UserService implements UserDetailsService {
      * @param userSignUpDto the DTO containing the user's sign-up information
      * @return the newly created UserResponseDto object
      */
-    public UserResponseDto createUser(UserSignUpDto userSignUpDto){
-        User user = new User(userSignUpDto);
-        user.setPassword(this.passwordEncoder.encode(user.getPassword()));
+    public UserResponseDto createUser(UserSignUpDto userSignUpDto) {
+        User user = UserMapper.INSTANCE.userSignupDtoToUserWithPassword(userSignUpDto, this.passwordEncoder);
         setRole(user, AuthorityLevel.USER);
+        user.setCreated(LocalDateTime.now());
         this.userRepository.save(user);
-        return new UserResponseDto(user);
+        return UserMapper.INSTANCE.userToUserResponseDto(user);
     }
 
     /**
      * Updates an existing user with the provided information.
      *
      * @param id the ID of the user to be updated
-     * @param userUpdateDto the DTO containing the updated user update information
+     * @param userUpdateDto the DTO containing the updated user information
      * @return the updated UserResponseDto object
      */
     public UserResponseDto updateUser(int id, UserUpdateDto userUpdateDto) {
         User user = getUserById(id);
-
-        user.setFirstName(userUpdateDto.getFirstName());
-        user.setLastName(userUpdateDto.getLastName());
-        user.setEmail(userUpdateDto.getEmail());
-        user.setPassword(this.passwordEncoder.encode(userUpdateDto.getPassword()));
-        user.setPhoneNumber(userUpdateDto.getPhoneNumber());
-
+        UserMapper.INSTANCE.updateUserFromDtoWithPassword(userUpdateDto, user, this.passwordEncoder);
         userRepository.save(user);
         log.info("User was updated successfully with ID: {}", id);
-        return new UserResponseDto(user);
+        return UserMapper.INSTANCE.userToUserResponseDto(user);
     }
 
     /**
@@ -116,8 +110,7 @@ public class UserService implements UserDetailsService {
         user.setDeleted(true);
         this.userRepository.save(user);
         log.info("User marked as deleted with ID: {}", id);
-
-        return new UserResponseDto(user);
+        return UserMapper.INSTANCE.userToUserResponseDto(user);
     }
 
     /**

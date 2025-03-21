@@ -1,9 +1,10 @@
-package no.ntnu.idata2306.mapper;
+package no.ntnu.idata2306.mapper.course;
 
 import no.ntnu.idata2306.dto.course.CourseResponseDto;
 import no.ntnu.idata2306.dto.course.CreateCourseDto;
 import no.ntnu.idata2306.dto.course.UpdateCourseDto;
-import no.ntnu.idata2306.model.Course;
+import no.ntnu.idata2306.mapper.course.details.*;
+import no.ntnu.idata2306.model.course.Course;
 import no.ntnu.idata2306.model.Review;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
@@ -13,8 +14,13 @@ import org.mapstruct.factory.Mappers;
 /**
  * Mapper interface for converting between Course entities and various Course DTOs.
  * Utilizes MapStruct for automatic generation of mapping implementations.
+ *
+ * This mapper uses other mappers for nested DTOs, ensuring that complex mappings
+ * are handled correctly and efficiently.
  */
-@Mapper
+@Mapper(uses = {CategoryMapper.class, CreditMapper.class, CurrencyMapper.class,
+        DifficultyLevelMapper.class, HoursPerWeekMapper.class,
+        TopicMapper.class, RelatedCertificateMapper.class})
 public interface CourseMapper {
 
     /**

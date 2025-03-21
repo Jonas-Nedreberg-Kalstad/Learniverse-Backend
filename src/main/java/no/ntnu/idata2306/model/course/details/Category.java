@@ -1,7 +1,6 @@
-package no.ntnu.idata2306.model;
+package no.ntnu.idata2306.model.course.details;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -9,8 +8,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import no.ntnu.idata2306.model.course.Course;
 
-import java.math.BigDecimal;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -18,23 +17,22 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Credit.class)
-@JsonIgnoreProperties("courses")
-@Schema(description = "Credit of a course.", name = "credit")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Category.class)
+@Schema(description = "Category of a course.", name = "category")
 @Entity
-public class Credit {
+public class Category {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
-    @Schema(description = "credit id")
+    @Schema(description = "category id")
     private int id;
 
-    @Column(name = "credit", nullable = false, unique = true)
-    @Schema(description = "credit value")
-    private BigDecimal credit;
+    @Column(name = "category", nullable = false, unique = true)
+    @Schema(description = "category name")
+    private String category;
 
-    @OneToMany(mappedBy = "credit")
-    @Schema(description = "courses with the given credit")
+    @OneToMany(mappedBy = "category")
+    @Schema(description = "courses with the given category")
     private Set<Course> courses = new LinkedHashSet<>();
 }

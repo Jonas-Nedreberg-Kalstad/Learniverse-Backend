@@ -11,6 +11,8 @@ import org.mapstruct.factory.Mappers;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.HashSet;
+
 /**
  * Mapper interface for converting between User entities and various User DTOs.
  * Utilizes MapStruct for automatic generation of mapping implementations.
@@ -40,8 +42,9 @@ public interface UserMapper {
      * @return the User entity with the encrypted password
      */
     default User userSignupDtoToUserWithPassword(UserSignUpDto signUpDto, @Lazy PasswordEncoder passwordEncoder) {
-        User user = userSignupDtoToUser(signUpDto); // TODO: Refactor UserService to utilize UserMapper
+        User user = userSignupDtoToUser(signUpDto);
         user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
+        user.setRoles(new HashSet<>()); // initializing hashset due to roles is always null for create
         return user;
     }
 

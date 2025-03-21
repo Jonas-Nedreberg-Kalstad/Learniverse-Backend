@@ -4,14 +4,20 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import no.ntnu.idata2306.model.Topic;
+import no.ntnu.idata2306.dto.course.details.TopicDto;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ScoredTopic {
+public class ScoredTopic implements ScoredItem {
 
-    private Topic topic;
+    private TopicDto topic;
     private double score;
+
+    @Override
+    public double getScore() {
+        return score;
+    }
+
 }

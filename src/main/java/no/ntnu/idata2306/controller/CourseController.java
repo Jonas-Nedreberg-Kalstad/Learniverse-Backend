@@ -11,8 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.ntnu.idata2306.dto.course.CourseResponseDto;
 import no.ntnu.idata2306.dto.course.CreateCourseDto;
 import no.ntnu.idata2306.dto.course.UpdateCourseDto;
-import no.ntnu.idata2306.mapper.CourseMapper;
-import no.ntnu.idata2306.model.Course;
+import no.ntnu.idata2306.mapper.course.CourseMapper;
+import no.ntnu.idata2306.model.course.Course;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.service.CourseService;
 import no.ntnu.idata2306.service.UserService;
@@ -71,7 +71,7 @@ public class CourseController {
             @ApiResponse(responseCode = "200", description = "Courses retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CourseResponseDto.class))),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/user/activeCourses")
+    @GetMapping("/anonymous/activeCourses")
     public List<CourseResponseDto> getAllActiveCourses() {
         return courseService.getAllActiveCourses();
     }
@@ -107,15 +107,22 @@ public class CourseController {
     @Operation(summary = "Get course by ID", description = "Retrieves a course by its ID.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Course retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CourseResponseDto.class))),
+            @ApiResponse(responseCode = "403", description = "Access to the requested course is forbidden."),
             @ApiResponse(responseCode = "404", description = "Course not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/admin/courses/{id}")
+    @GetMapping("/anonymous/courses/{id}")
     public ResponseEntity<CourseResponseDto> getCourse(@PathVariable int id) {
         Course course = this.courseService.getCourseById(id);
         CourseResponseDto foundCourse = CourseMapper.INSTANCE.courseToResponseCourseDto(course);
-        log.info("Course found with ID: {}", id);
-        return new ResponseEntity<>(foundCourse, HttpStatus.OK);
+
+        if(foundCourse.isActive()){
+            log.info("Course found with ID: {}", id);
+            return new ResponseEntity<>(foundCourse, HttpStatus.OK);
+        }
+
+        log.error("Forbidden access attempt for course with ID: {}", id);
+        return new ResponseEntity<>(foundCourse, HttpStatus.FORBIDDEN);
     }
 
     /**

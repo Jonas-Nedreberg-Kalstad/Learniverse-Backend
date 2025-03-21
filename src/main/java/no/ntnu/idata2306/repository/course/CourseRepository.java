@@ -1,9 +1,11 @@
-package no.ntnu.idata2306.repository;
+package no.ntnu.idata2306.repository.course;
 
+import no.ntnu.idata2306.dto.course.CourseResponseDto;
 import no.ntnu.idata2306.dto.search.ScoredCourse;
-import no.ntnu.idata2306.model.Category;
-import no.ntnu.idata2306.model.Course;
-import no.ntnu.idata2306.model.Topic;
+import no.ntnu.idata2306.mapper.course.CourseMapper;
+import no.ntnu.idata2306.model.course.details.Category;
+import no.ntnu.idata2306.model.course.Course;
+import no.ntnu.idata2306.model.course.details.Topic;
 import no.ntnu.idata2306.util.ScoreUtils;
 import no.ntnu.idata2306.util.StringUtils;
 import org.springframework.data.domain.Page;
@@ -114,7 +116,8 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
             int distance = StringUtils.levenshteinDistance(searchTerm, course.getCourseName());
             double score = ScoreUtils.normalizeScore(distance, Math.max(searchTerm.length(), course.getCourseName().length()));
             if (score > 0) { // Percentage greater than 0 due to lack of data
-                matchedTopics.add(new ScoredCourse(course, score));
+                CourseResponseDto courseDto = CourseMapper.INSTANCE.courseToResponseCourseDto(course);
+                matchedTopics.add(new ScoredCourse(courseDto, score));
             }
         }
         return matchedTopics;

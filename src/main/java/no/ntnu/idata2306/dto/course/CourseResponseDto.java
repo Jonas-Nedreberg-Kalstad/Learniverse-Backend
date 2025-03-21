@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import no.ntnu.idata2306.model.*;
+import no.ntnu.idata2306.dto.course.details.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -34,11 +34,11 @@ public class CourseResponseDto {
     private double averageRating;
     private int numberOfReviews;
 
-    private Category category;
-    private Credit credit;
-    private Currency currency;
-    private DifficultyLevel difficultyLevel;
-    private HoursPerWeek hoursPerWeek;
-    private Set<Topic> topics;
-    private Set<RelatedCertificate> relatedCertificates;
+    private CategoryDto category;
+    private CreditDto credit;
+    private CurrencyDto currency;
+    private DifficultyLevelDto difficultyLevel;
+    private HoursPerWeekDto hoursPerWeek;
+    private Set<TopicDto> topics;
+    private Set<RelatedCertificateDto> relatedCertificates;
 }

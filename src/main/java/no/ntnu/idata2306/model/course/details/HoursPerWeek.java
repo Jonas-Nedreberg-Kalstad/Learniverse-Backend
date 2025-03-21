@@ -1,7 +1,6 @@
-package no.ntnu.idata2306.model;
+package no.ntnu.idata2306.model.course.details;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
@@ -9,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import no.ntnu.idata2306.model.course.Course;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -17,23 +17,22 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Category.class)
-@JsonIgnoreProperties("courses")
-@Schema(description = "Category of a course.", name = "category")
+@JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = HoursPerWeek.class)
+@Schema(description = "hoursPerWeek of a course.", name = "hours_per_week")
 @Entity
-public class Category {
+public class HoursPerWeek {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false, unique = true)
-    @Schema(description = "category id")
+    @Schema(description = "hoursPerWeek id")
     private int id;
 
-    @Column(name = "category", nullable = false, unique = true)
-    @Schema(description = "category name")
-    private String category;
+    @Column(name = "hours", nullable = false, unique = true)
+    @Schema(description = "hoursPerWeek hours")
+    private int hours;
 
-    @OneToMany(mappedBy = "category")
-    @Schema(description = "courses with the given category")
+    @OneToMany(mappedBy = "hoursPerWeek")
+    @Schema(description = "courses with the given hoursPerWeek")
     private Set<Course> courses = new LinkedHashSet<>();
 }

@@ -6,7 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import no.ntnu.idata2306.model.*;
+import no.ntnu.idata2306.model.course.details.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

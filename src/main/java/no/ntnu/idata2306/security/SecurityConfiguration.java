@@ -18,6 +18,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 @Configuration
 @EnableMethodSecurity
@@ -28,6 +29,7 @@ public class SecurityConfiguration {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
     private final JwtRequestFilter jwtFilter;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     /**
      * Constructs a new SecurityConfiguration with the specified UserDetailsService, PasswordEncoder, and JwtRequestFilter.
@@ -36,12 +38,15 @@ public class SecurityConfiguration {
      * @param userDetailsService the user details service for loading user data
      * @param passwordEncoder the password encoder for encoding passwords
      * @param jwtFilter the JWT request filter for handling JWT authentication
+     * @param corsConfigurationSource
      */
     @Autowired
-    public SecurityConfiguration(UserDetailsService userDetailsService, @Lazy PasswordEncoder passwordEncoder, JwtRequestFilter jwtFilter) {
+    public SecurityConfiguration(UserDetailsService userDetailsService, @Lazy PasswordEncoder passwordEncoder, JwtRequestFilter jwtFilter,
+                                 CorsConfigurationSource corsConfigurationSource) {
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
         this.jwtFilter = jwtFilter;
+        this.corsConfigurationSource = corsConfigurationSource;
     }
 
     /**
@@ -69,7 +74,7 @@ public class SecurityConfiguration {
             description = "Sets up the authorization filter chain for the application, defining security rules and filters."
     )
     public SecurityFilterChain configureAuthorizationFilterChain(HttpSecurity http) throws Exception {
-        http.csrf(AbstractHttpConfigurer::disable).cors(AbstractHttpConfigurer::disable)
+        http.csrf(AbstractHttpConfigurer::disable).cors(cors -> cors.configurationSource(this.corsConfigurationSource))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasAuthority(AuthorityLevel.ADMIN)
                         .requestMatchers("/api/user/**").hasAnyAuthority(AuthorityLevel.ADMIN, AuthorityLevel.USER, AuthorityLevel.PROVIDER)

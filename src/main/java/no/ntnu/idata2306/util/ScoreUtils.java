@@ -1,5 +1,7 @@
 package no.ntnu.idata2306.util;
 
+import no.ntnu.idata2306.dto.LevenshteinDto;
+
 import java.util.List;
 
 /**
@@ -49,8 +51,8 @@ public class ScoreUtils {
                 if (correctWord.equalsIgnoreCase(searchWord)) {
                     score = 100; // Exact match gets full score
                 } else {
-                    int[] distanceAndTranspositions = StringUtils.damerauLevenshteinDistance(searchWord, correctWord);
-                    score = adjustedNormalizeScore(distanceAndTranspositions[0], Math.max(searchWord.length(), correctWord.length()), distanceAndTranspositions[1]);
+                    LevenshteinDto levenshteinDto = StringUtils.damerauLevenshteinDistance(searchWord, correctWord);
+                    score = adjustedNormalizeScore(levenshteinDto.getDistance(), Math.max(searchWord.length(), correctWord.length()), levenshteinDto.getTranspositions());
                 }
                 bestScore = Math.max(bestScore, score);
             }

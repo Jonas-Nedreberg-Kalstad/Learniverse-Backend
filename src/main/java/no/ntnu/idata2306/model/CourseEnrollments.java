@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import no.ntnu.idata2306.model.course.Course;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

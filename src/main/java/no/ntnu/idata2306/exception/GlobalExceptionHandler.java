@@ -21,6 +21,11 @@ import java.util.*;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
+    private static final String ERROR_CODE = "errorCode";
+    private static final String DETAILS = "details";
+    private static final String MESSAGE = "message";
+    private static final String TIMESTAMP = "timestamp";
+
     /**
      * Handles MethodArgumentNotValidException and returns a response with validation error messages.
      * This method collects all validation errors for each field and returns them in a list.
@@ -62,13 +67,33 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException ex) {
 
         Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("timestamp", LocalDateTime.now());
-        errorDetails.put("message", "Unsupported media type. Please ensure the Content-Type header is set to 'application/json', and that data sent is of correct format.");
-        errorDetails.put("details", ex.getMessage());
-        errorDetails.put("errorCode", "UNSUPPORTED_MEDIA_TYPE");
+        errorDetails.put(TIMESTAMP, LocalDateTime.now());
+        errorDetails.put(MESSAGE, "Unsupported media type. Please ensure the Content-Type header is set to 'application/json', and that data sent is of correct format.");
+        errorDetails.put(DETAILS, ex.getMessage());
+        errorDetails.put(ERROR_CODE, HttpStatus.UNSUPPORTED_MEDIA_TYPE.toString());
 
         log.error("Unsupported media type: ", ex);
         return new ResponseEntity<>(errorDetails, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    /**
+     * Handles BKTreeException and returns a response with an error message.
+     *
+     * @param ex the BKTreeException thrown when BKTree initialization fails due to no data
+     * @return ResponseEntity containing the error message, with HTTP status 204 (No Content)
+     */
+    @ExceptionHandler(BKTreeException.class)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public ResponseEntity<Map<String, Object>> handleBKTreeException(BKTreeException ex) {
+
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put(TIMESTAMP, LocalDateTime.now());
+        errorDetails.put(MESSAGE, "BKTree initialization failed. No data available. Please try again later.");
+        errorDetails.put(DETAILS, ex.getMessage());
+        errorDetails.put(ERROR_CODE, HttpStatus.NO_CONTENT.toString());
+
+        log.error("BKTree initialization error: ", ex);
+        return new ResponseEntity<>(errorDetails, HttpStatus.NO_CONTENT);
     }
 
     /**
@@ -82,10 +107,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<Map<String, Object>> handleAllExceptions(Exception ex) {
 
         Map<String, Object> errorDetails = new HashMap<>();
-        errorDetails.put("timestamp", LocalDateTime.now());
-        errorDetails.put("message", "An unexpected error occurred. Please try again later.");
-        errorDetails.put("details", ex.getMessage());
-        errorDetails.put("errorCode", "INTERNAL_SERVER_ERROR");
+        errorDetails.put(TIMESTAMP, LocalDateTime.now());
+        errorDetails.put(MESSAGE, "An unexpected error occurred. Please try again later.");
+        errorDetails.put(DETAILS, ex.getMessage());
+        errorDetails.put(ERROR_CODE, HttpStatus.INTERNAL_SERVER_ERROR.toString());
 
         log.error("Internal server error details: {}, error: ", errorDetails, ex);
         return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);

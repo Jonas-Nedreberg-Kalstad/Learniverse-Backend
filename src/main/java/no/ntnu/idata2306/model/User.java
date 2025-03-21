@@ -11,6 +11,7 @@ import lombok.Builder;
 import no.ntnu.idata2306.dto.user.UserResponseDto;
 import no.ntnu.idata2306.dto.user.UserSignUpDto;
 import no.ntnu.idata2306.dto.user.UserUpdateDto;
+import no.ntnu.idata2306.model.course.Course;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;

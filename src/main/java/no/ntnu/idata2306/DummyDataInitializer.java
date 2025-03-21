@@ -2,8 +2,14 @@ package no.ntnu.idata2306;
 
 import lombok.extern.slf4j.Slf4j;
 import no.ntnu.idata2306.model.*;
-import no.ntnu.idata2306.model.Currency;
+import no.ntnu.idata2306.model.course.details.*;
+import no.ntnu.idata2306.model.course.Course;
+import no.ntnu.idata2306.model.course.details.Currency;
+import no.ntnu.idata2306.repository.course.details.*;
+import no.ntnu.idata2306.repository.course.CourseRepository;
 import no.ntnu.idata2306.repository.*;
+import no.ntnu.idata2306.repository.course.details.RelatedCertificateRepository;
+import no.ntnu.idata2306.repository.course.details.TopicRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -14,8 +20,6 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-
-import static org.hibernate.annotations.UuidGenerator.Style.RANDOM;
 
 /**
  * Responsible for populating database with dummy data for testing.

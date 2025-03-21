@@ -1,5 +1,7 @@
 package no.ntnu.idata2306.util;
 
+import no.ntnu.idata2306.dto.LevenshteinDto;
+
 /**
  * Utility class for string operations.
  */
@@ -72,7 +74,7 @@ public class StringUtils {
      * @param b the second string.
      * @return an array where the first element is the Damerau-Levenshtein distance and the second element is the number of transpositions.
      */
-    public static int[] damerauLevenshteinDistance(String a, String b) {
+    public static LevenshteinDto damerauLevenshteinDistance(String a, String b) {
         int[][] dp = new int[a.length() + 1][b.length() + 1];
         int transpositions = 0;
 
@@ -94,7 +96,7 @@ public class StringUtils {
                 }
             }
         }
-        return new int[]{dp[a.length()][b.length()], transpositions};
+        return new LevenshteinDto(dp[a.length()][b.length()], transpositions);
     }
 
     private StringUtils(){}

@@ -9,10 +9,12 @@ import java.util.Map;
 
 /**
  * BKTree is a data structure used for efficient fuzzy searching.
- * It organizes strings in a way that allows for quick retrieval of close matches based on edit distance.
- * This implementation uses the Damerau-Levenshtein distance to measure the similarity between strings.
+ * It organizes elements in a way that allows for quick retrieval of close matches based on edit distance.
+ * This implementation uses the Damerau-Levenshtein distance to measure the similarity between elements.
+ *
+ * @param <T> the type of elements stored in the BKTree.
  */
-public class BKTree {
+public class BKTree<T> {
     private Node root;
 
     /**
@@ -23,30 +25,30 @@ public class BKTree {
     }
 
     /**
-     * Adds a word to the BKTree.
-     * If the tree is empty, the word becomes the root.
-     * Otherwise, the word is added to the appropriate position based on its edit distance from existing words.
+     * Adds an element to the BKTree.
+     * If the tree is empty, the element becomes the root.
+     * Otherwise, the element is added to the appropriate position based on its edit distance from existing elements.
      *
-     * @param word the word to add to the BKTree.
+     * @param element the element to add to the BKTree.
      */
-    public void add(String word) {
+    public void add(T element) {
         if (root == null) {
-            root = new Node(word);
+            root = new Node(element);
         } else {
-            root.add(word);
+            root.add(element);
         }
     }
 
     /**
-     * Searches for words in the BKTree that are within a specified edit distance from the query.
+     * Searches for elements in the BKTree that are within a specified edit distance from the query.
      * The search is performed recursively, starting from the root.
      *
-     * @param query     the query word to search for.
+     * @param query     the query element to search for.
      * @param threshold the maximum edit distance allowed for matches.
-     * @return a list of words that are within the specified edit distance from the query.
+     * @return a list of elements that are within the specified edit distance from the query.
      */
-    public List<String> search(String query, int threshold) {
-        List<String> results = new ArrayList<>();
+    public List<T> search(T query, int threshold) {
+        List<T> results = new ArrayList<>();
         if (root != null) {
             root.search(query, threshold, results);
         }
@@ -55,52 +57,52 @@ public class BKTree {
 
     /**
      * Node represents a single node in the BKTree.
-     * Each node contains a word and a map of children nodes, where the keys are edit distances.
+     * Each node contains an element and a map of children nodes, where the keys are edit distances.
      */
-    private static class Node {
-        private final String word;
+    private class Node {
+        private final T element;
         private final Map<Integer, Node> children;
 
         /**
-         * Constructs a Node with the specified word.
+         * Constructs a Node with the specified element.
          *
-         * @param word the word contained in this node.
+         * @param element the element contained in this node.
          */
-        public Node(String word) {
-            this.word = word;
+        public Node(T element) {
+            this.element = element;
             this.children = new HashMap<>();
         }
 
         /**
-         * Adds a word to the subtree rooted at this node.
-         * The word is placed in the appropriate position based on its edit distance from this node's word.
+         * Adds an element to the subtree rooted at this node.
+         * The element is placed in the appropriate position based on its edit distance from this node's element.
          *
-         * @param word the word to add to the subtree.
+         * @param element the element to add to the subtree.
          */
-        public void add(String word) {
-            int[] distanceAndTranspositions = StringUtils.damerauLevenshteinDistance(this.word, word);
-            Node child = children.get(distanceAndTranspositions[0]);
+        public void add(T element) {
+            int distance = StringUtils.damerauLevenshteinDistance(this.element.toString(), element.toString()).getDistance();
+            Node child = children.get(distance);
             if (child == null) {
-                children.put(distanceAndTranspositions[0], new Node(word));
+                children.put(distance, new Node(element));
             } else {
-                child.add(word);
+                child.add(element);
             }
         }
 
         /**
-         * Searches for words in the subtree rooted at this node that are within a specified edit distance from the query.
+         * Searches for elements in the subtree rooted at this node that are within a specified edit distance from the query.
          * The search is performed recursively, considering nodes within the range of the threshold.
          *
-         * @param query     the query word to search for.
+         * @param query     the query element to search for.
          * @param threshold the maximum edit distance allowed for matches.
-         * @param results   the list to store matching words.
+         * @param results   the list to store matching elements.
          */
-        public void search(String query, int threshold, List<String> results) {
-            int[] distanceAndTranspositions = StringUtils.damerauLevenshteinDistance(this.word, query);
-            if (distanceAndTranspositions[0] <= threshold) {
-                results.add(this.word);
+        public void search(T query, int threshold, List<T> results) {
+            int distance = StringUtils.damerauLevenshteinDistance(this.element.toString(), query.toString()).getDistance();
+            if (distance <= threshold) {
+                results.add(this.element);
             }
-            for (int i = Math.max(0, distanceAndTranspositions[0] - threshold); i <= distanceAndTranspositions[0] + threshold; i++) {
+            for (int i = Math.max(0, distance - threshold); i <= distance + threshold; i++) {
                 Node child = children.get(i);
                 if (child != null) {
                     child.search(query, threshold, results);

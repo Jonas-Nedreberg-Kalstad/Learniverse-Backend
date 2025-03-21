@@ -1,23 +1,27 @@
 package no.ntnu.idata2306.service;
 
 import lombok.extern.slf4j.Slf4j;
+import no.ntnu.idata2306.dto.course.CourseResponseDto;
+import no.ntnu.idata2306.dto.course.details.CategoryDto;
+import no.ntnu.idata2306.dto.course.details.TopicDto;
 import no.ntnu.idata2306.dto.search.*;
-import no.ntnu.idata2306.model.Category;
-import no.ntnu.idata2306.model.Course;
-import no.ntnu.idata2306.model.Topic;
-import no.ntnu.idata2306.repository.CategoryRepository;
-import no.ntnu.idata2306.repository.CourseRepository;
-import no.ntnu.idata2306.repository.TopicRepository;
+import no.ntnu.idata2306.mapper.course.CourseMapper;
+import no.ntnu.idata2306.mapper.course.details.CategoryMapper;
+import no.ntnu.idata2306.mapper.course.details.TopicMapper;
+import no.ntnu.idata2306.model.course.details.Category;
+import no.ntnu.idata2306.model.course.Course;
+import no.ntnu.idata2306.model.course.details.Topic;
+import no.ntnu.idata2306.repository.course.details.CategoryRepository;
+import no.ntnu.idata2306.repository.course.CourseRepository;
+import no.ntnu.idata2306.repository.course.details.TopicRepository;
 import no.ntnu.idata2306.util.ScoreThresholdUtils;
 import no.ntnu.idata2306.util.ScoreUtils;
-import no.ntnu.idata2306.util.datastructure.BKTree;
+import no.ntnu.idata2306.util.SearchUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -49,94 +53,108 @@ public class SearchService {
      * @return a SearchResult object containing the scored courses, categories, and topics, along with pagination information.
      */
     public SearchResult search(SearchCriteria criteria, Pageable pageable) {
-        BKTree courseTree = new BKTree();
-        BKTree categoryTree = new BKTree();
-        BKTree topicTree = new BKTree();
 
+        List<ScoredCourse> courses = this.courseSearch(criteria.getCourseName(), pageable);
+
+        List<ScoredTopic> topics = this.topicSearch(criteria.getTopicName(), pageable);
+
+        List<ScoredCategory> categories = this.categorySearch(criteria.getCategoryName(), pageable);
+
+        if (courses.isEmpty() && topics.isEmpty() && categories.isEmpty()){
+            return null;
+        }
+
+        return new SearchResult(courses, categories, topics, pageable);
+    }
+
+
+    /**
+     * Searches for courses based on the provided course name and paginates the results.
+     * The scores are calculated using the Levenshtein distance between the search terms and the names of the courses.
+     * The scores are normalized to a percentage to reflect the closeness of the match.
+     * The results are filtered based on predefined score thresholds to ensure relevance.
+     * BK-trees are used to optimize the search process by efficiently finding close matches.
+     *
+     * @param courseName the name of the course to search for.
+     * @param pageable   the pagination information.
+     * @return a paginated list of scored courses based on the search criteria.
+     */
+    public List<ScoredCourse> courseSearch(String courseName, Pageable pageable) {
         List<Course> courses = courseRepository.findByActiveTrue();
-        List<Category> categories = categoryRepository.findAll();
-        List<Topic> topics = topicRepository.findAll();
-
-        for (Course course : courses) {
-            courseTree.add(course.getCourseName());
-        }
-
-        for (Category category : categories) {
-            categoryTree.add(category.getCategory());
-        }
-
-        for (Topic topic : topics) {
-            topicTree.add(topic.getTopic());
-        }
-
-        List<String> courseResults = courseTree.search(criteria.getCourseName(), 20);
-        List<String> categoryResults = categoryTree.search(criteria.getCategoryName(), 20);
-        List<String> topicResults = topicTree.search(criteria.getTopicName(), 20);
-
-        List<ScoredCourse> scoredCourses = new ArrayList<>();
-        List<ScoredCategory> scoredCategories = new ArrayList<>();
-        List<ScoredTopic> scoredTopics = new ArrayList<>();
-
-        for (String courseName : courseResults) {
-            Course course = courses.stream().filter(c -> c.getCourseName().equals(courseName)).findFirst().orElse(null);
-            if (course != null) {
-                double courseNameScore = ScoreUtils.calculateAverageNormalizedScore(
+        return SearchUtils.genericSearch(
+                courseName,
+                pageable,
+                courses,
+                Course::getCourseName,
+                course -> ScoreUtils.calculateAverageNormalizedScore(
                         Arrays.asList(course.getCourseName().split(" ")),
-                        Arrays.asList(criteria.getCourseName().split(" "))
-                );
-                if (courseNameScore > ScoreThresholdUtils.COURSE_SCORE_THRESHOLD) {
-                    scoredCourses.add(new ScoredCourse(course, courseNameScore));
+                        Arrays.asList(courseName.split(" "))
+                ),
+                ScoreThresholdUtils.COURSE_SCORE_THRESHOLD,
+                (course, score) -> {
+                    CourseResponseDto courseDto = CourseMapper.INSTANCE.courseToResponseCourseDto(course);
+                    return new ScoredCourse(courseDto, score);
                 }
-            }
-        }
+        );
+    }
 
-        for (String categoryName : categoryResults) {
-            Category category = categories.stream().filter(c -> c.getCategory().equals(categoryName)).findFirst().orElse(null);
-            if (category != null) {
-                double categoryNameScore = ScoreUtils.calculateAverageNormalizedScore(
+    /**
+     * Searches for categories based on the provided category name and paginates the results.
+     * The scores are calculated using the Levenshtein distance between the search terms and the names of the categories.
+     * The scores are normalized to a percentage to reflect the closeness of the match.
+     * The results are filtered based on predefined score thresholds to ensure relevance.
+     * BK-trees are used to optimize the search process by efficiently finding close matches.
+     *
+     * @param categoryName the name of the category to search for.
+     * @param pageable     the pagination information.
+     * @return a paginated list of scored categories based on the search criteria.
+     */
+    public List<ScoredCategory> categorySearch(String categoryName, Pageable pageable) {
+        List<Category> categories = categoryRepository.findAll();
+        return SearchUtils.genericSearch(
+                categoryName,
+                pageable,
+                categories,
+                Category::getCategory,
+                category -> ScoreUtils.calculateAverageNormalizedScore(
                         Arrays.asList(category.getCategory().split(" ")),
-                        Arrays.asList(criteria.getCategoryName().split(" "))
-                );
-                if (categoryNameScore > ScoreThresholdUtils.CATEGORY_SCORE_THRESHOLD) {
-                    scoredCategories.add(new ScoredCategory(category, categoryNameScore));
+                        Arrays.asList(categoryName.split(" "))
+                ),
+                ScoreThresholdUtils.CATEGORY_SCORE_THRESHOLD,
+                (category, score) -> {
+                    CategoryDto categoryDto = CategoryMapper.INSTANCE.categoryToCategoryDto(category);
+                    return new ScoredCategory(categoryDto, score);
                 }
-            }
-        }
+        );
+    }
 
-        for (String topicName : topicResults) {
-            Topic topic = topics.stream().filter(t -> t.getTopic().equals(topicName)).findFirst().orElse(null);
-            if (topic != null) {
-                double topicNameScore = ScoreUtils.calculateAverageNormalizedScore(
+    /**
+     * Searches for topics based on the provided topic name and paginates the results.
+     * The scores are calculated using the Levenshtein distance between the search terms and the names of the topics.
+     * The scores are normalized to a percentage to reflect the closeness of the match.
+     * The results are filtered based on predefined score thresholds to ensure relevance.
+     * BK-trees are used to optimize the search process by efficiently finding close matches.
+     *
+     * @param topicName the name of the topic to search for.
+     * @param pageable  the pagination information.
+     * @return a paginated list of scored topics based on the search criteria.
+     */
+    public List<ScoredTopic> topicSearch(String topicName, Pageable pageable) {
+        List<Topic> topics = topicRepository.findAll();
+        return SearchUtils.genericSearch(
+                topicName,
+                pageable,
+                topics,
+                Topic::getTopic,
+                topic -> ScoreUtils.calculateAverageNormalizedScore(
                         Arrays.asList(topic.getTopic().split(" ")),
-                        Arrays.asList(criteria.getTopicName().split(" "))
-                );
-                if (topicNameScore > ScoreThresholdUtils.TOPIC_SCORE_THRESHOLD) {
-                    scoredTopics.add(new ScoredTopic(new Topic(topic.getId(), topic.getTopic(), topic.getCourses()), topicNameScore));
+                        Arrays.asList(topicName.split(" "))
+                ),
+                ScoreThresholdUtils.TOPIC_SCORE_THRESHOLD,
+                (topic, score) -> {
+                    TopicDto topicDto = TopicMapper.INSTANCE.topicToTopicDto(topic);
+                    return new ScoredTopic(topicDto, score);
                 }
-            }
-        }
-
-        scoredCourses.sort(Comparator.comparingDouble(ScoredCourse::getScore).reversed());
-        scoredCategories.sort(Comparator.comparingDouble(ScoredCategory::getScore).reversed());
-        scoredTopics.sort(Comparator.comparingDouble(ScoredTopic::getScore).reversed());
-
-        int totalCourses = scoredCourses.size();
-        int totalCategories = scoredCategories.size();
-        int totalTopics = scoredTopics.size();
-
-        int startCourseIndex = (int) pageable.getOffset();
-        int endCourseIndex = Math.min((startCourseIndex + pageable.getPageSize()), totalCourses);
-
-        int startCategoryIndex = (int) pageable.getOffset();
-        int endCategoryIndex = Math.min((startCategoryIndex + pageable.getPageSize()), totalCategories);
-
-        int startTopicIndex = (int) pageable.getOffset();
-        int endTopicIndex = Math.min((startTopicIndex + pageable.getPageSize()), totalTopics);
-
-        List<ScoredCourse> paginatedCourses = scoredCourses.subList(startCourseIndex, endCourseIndex);
-        List<ScoredCategory> paginatedCategories = scoredCategories.subList(startCategoryIndex, endCategoryIndex);
-        List<ScoredTopic> paginatedTopics = scoredTopics.subList(startTopicIndex, endTopicIndex);
-
-        return new SearchResult(paginatedCourses, paginatedCategories, paginatedTopics, pageable);
+        );
     }
 }

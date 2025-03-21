@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import lombok.*;
+import no.ntnu.idata2306.model.course.Course;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
