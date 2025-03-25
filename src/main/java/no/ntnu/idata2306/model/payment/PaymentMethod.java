@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.model;
+package no.ntnu.idata2306.model.payment;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import no.ntnu.idata2306.enums.PaymentMethodEnum;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -27,9 +28,10 @@ public class PaymentMethod {
     @Schema(description = "Payment method ID")
     private int id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "method", nullable = false, unique = true)
     @Schema(description = "Payment method name")
-    private String method;
+    private PaymentMethodEnum method;
 
     @OneToMany(mappedBy = "paymentMethod")
     @Schema(description = "Payments associated with the payment method")

@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.model;
+package no.ntnu.idata2306.model.payment;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import no.ntnu.idata2306.model.User;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;

@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.model;
+package no.ntnu.idata2306.model.course;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -9,7 +9,7 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import no.ntnu.idata2306.model.course.Course;
+import no.ntnu.idata2306.model.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -46,17 +46,13 @@ public class CourseEnrollments {
     @Schema(description = "Hours per week for the course")
     private int hoursPerWeek;
 
-    @Column(name = "enrollment_status", nullable = false)
+    @Column(name = "enrolled", nullable = false)
     @Schema(description = "Enrollment status")
-    private String enrollmentStatus;
+    private boolean enrolled;
 
     @Column(name = "created", nullable = false)
     @Schema(description = "Creation date of the enrollment")
     private LocalDateTime created;
-
-    @Column(name = "updated", nullable = true)
-    @Schema(description = "Update date of the enrollment")
-    private LocalDateTime updated;
 
     @ManyToOne
     @JoinColumn(name = "course_id", referencedColumnName = "id")
@@ -68,8 +64,4 @@ public class CourseEnrollments {
     @Schema(description = "User associated with the enrollment")
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "orders_id", referencedColumnName = "id")
-    @Schema(description = "Order associated with the enrollment")
-    private Orders orders;
 }

@@ -23,47 +23,6 @@ import java.util.Set;
 @Repository
 public interface CourseRepository extends JpaRepository<Course, Integer> {
 
-    Page<Course> findByCourseNameContainingIgnoreCase(String courseName, Pageable pageable);
-
-    Page<Course> findByCategory(Category category, Pageable pageable);
-
-    Page<Course> findByCategoryId(Integer categoryId, Pageable pageable);
-
-    Page<Course> findByTopics(Set<Topic> topics, Pageable pageable);
-
-    @Query("SELECT c FROM Course c JOIN c.topics t WHERE t.id = :topicId")
-    Page<Course> findByTopicId(@Param("topicId") Integer topicId, Pageable pageable);
-
-    Page<Course> findByCategoryAndTopics(Category category, Set<Topic> topics, Pageable pageable);
-
-    @Query("SELECT c FROM Course c JOIN c.topics t WHERE c.category.id = :categoryId AND t.id = :topicId")
-    Page<Course> findByCategoryIdAndTopicId(@Param("categoryId") Integer categoryId,
-                                            @Param("topicId") Integer topicId,
-                                            Pageable pageable);
-
-    // Advanced search with multiple optional criteria and pagination
-    @Query("SELECT course FROM Course course " +
-            "JOIN course.topics t " +
-            "WHERE (:courseName IS NULL OR LOWER(course.courseName) LIKE LOWER(CONCAT('%', :courseName, '%'))) " +
-            "AND (:categoryId IS NULL OR course.category.id = :categoryId) " +
-            "AND (:topicId IS NULL OR t.id = :topicId) " +
-            "AND (course.active = true)")
-    Page<Course> searchCourses(@Param("courseName") String courseName,
-                               @Param("categoryId") Integer categoryId,
-                               @Param("topicId") Integer topicId,
-                               Pageable pageable);
-
-
-    /**
-     * Finds courses based on the provided course name, category name, and topic name.
-     * The search allows for partial matches using the SQL LIKE operator.
-     *
-     * @param courseName   the name of the course to search for. Partial matches are allowed.
-     * @return a list of courses that match the search criteria.
-     */
-    @Query("SELECT c FROM Course c WHERE c.courseName LIKE %:courseName%")
-    List<Course> findCoursesByCourseName(@Param("courseName") String courseName);
-
     /**
      * Finds courses with a calculated relevance score based on the provided search criteria.
      * The score is calculated as follows:
@@ -130,7 +89,37 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
 
     Page<Course> findByTopicsIn(Collection<Set<Topic>> topics, Pageable pageable);
 
+
+    /**
+     * Searches for courses based on the provided category ID and a list of topic IDs.
+     * The search includes only active courses. Any of the parameters can be null, making them optional in the search criteria.
+     *
+     * @param categoryId the ID of the category to search for. Can be null.
+     * @param topicIds   the list of topic IDs to search for. Can be null.
+     * @param pageable   the pagination information.
+     * @return a page of courses that match the search criteria.
+     */
+    @Query("SELECT course FROM Course course " +
+            "JOIN course.topics t " +
+            "WHERE (:categoryId IS NULL OR course.category.id = :categoryId) " +
+            "AND (:topicIds IS NULL OR t.id IN :topicIds) " +
+            "AND (course.active = true)")
+    Page<Course> searchCoursesByTopicsAndCategory(@Param("categoryId") Integer categoryId,
+                                                  @Param("topicIds") List<Integer> topicIds,
+                                                  Pageable pageable);
+
+    /**
+     * Finds all active courses.
+     *
+     * @return a list of active courses.
+     */
     List<Course> findByActiveTrue();
 
+    /**
+     * Finds all active courses with pagination.
+     *
+     * @param pageable the pagination information.
+     * @return a page of active courses.
+     */
     Page<Course> findByActiveTrue(Pageable pageable);
 }

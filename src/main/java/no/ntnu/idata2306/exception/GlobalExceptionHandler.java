@@ -97,6 +97,26 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles CardTokenHashException and returns a response with an error message.
+     *
+     * @param ex the CardTokenHashException thrown when hashing the card token fails
+     * @return ResponseEntity containing the error message, with HTTP status 422 (Unprocessable Entity)
+     */
+    @ExceptionHandler(CardTokenHashException.class)
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    public ResponseEntity<Map<String, Object>> handleCardTokenHashException(CardTokenHashException ex) {
+
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put(TIMESTAMP, LocalDateTime.now());
+        errorDetails.put(MESSAGE, "Error occurred while hashing the card token. Please try again later.");
+        errorDetails.put(DETAILS, ex.getMessage());
+        errorDetails.put(ERROR_CODE, HttpStatus.UNPROCESSABLE_ENTITY.toString());
+
+        log.error("Card token hashing error: ", ex);
+        return new ResponseEntity<>(errorDetails, HttpStatus.UNPROCESSABLE_ENTITY);
+    }
+
+    /**
      * Handles all other exceptions and returns a response with an error message.
      *
      * @param ex the Exception thrown

@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.model;
+package no.ntnu.idata2306.model.payment;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import no.ntnu.idata2306.enums.OrderStatusEnum;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -27,9 +28,10 @@ public class OrderStatus {
     @Schema(description = "Order status ID")
     private int id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false, unique = true)
     @Schema(description = "Order status")
-    private String status;
+    private OrderStatusEnum status;
 
     @OneToMany(mappedBy = "orderStatus")
     @Schema(description = "Orders associated with the order status")

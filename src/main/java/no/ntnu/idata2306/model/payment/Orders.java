@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.model;
+package no.ntnu.idata2306.model.payment;
 
 import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.ObjectIdGenerators;
@@ -9,12 +9,11 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.model.course.Course;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 @Getter
 @Setter
@@ -64,7 +63,4 @@ public class Orders {
     @Schema(description = "Payment associated with the order")
     private Payment payment;
 
-    @OneToMany(mappedBy = "orders")
-    @Schema(description = "Enrollments associated with the order")
-    private Set<CourseEnrollments> enrollments = new LinkedHashSet<>();
 }

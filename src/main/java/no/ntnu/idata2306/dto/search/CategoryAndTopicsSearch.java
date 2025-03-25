@@ -8,14 +8,13 @@ import lombok.Setter;
 import java.util.List;
 
 /**
- * Dto for search result
+ * Dto for Searching for multiple topics and a category
  */
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SearchResult {
-    private List<ScoredCourse> scoredCourses;
-    private List<ScoredCategory> scoredCategories;
-    private List<ScoredTopic> scoredTopics;
+public class CategoryAndTopicsSearch {
+    private Integer categoryId;
+    private List<Integer> topicIds;
 }

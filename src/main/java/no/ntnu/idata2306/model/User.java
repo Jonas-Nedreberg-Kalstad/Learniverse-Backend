@@ -8,10 +8,8 @@ import lombok.Setter;
 import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import no.ntnu.idata2306.dto.user.UserResponseDto;
-import no.ntnu.idata2306.dto.user.UserSignUpDto;
-import no.ntnu.idata2306.dto.user.UserUpdateDto;
 import no.ntnu.idata2306.model.course.Course;
+import no.ntnu.idata2306.model.payment.PaymentCard;
 
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
@@ -94,49 +92,4 @@ public class User {
     @Schema(description = "Roles the user has")
     private Set<Role> roles = new LinkedHashSet<>();
 
-
-    /**
-     * Constructor that takes in a SignUpDto.
-     *
-     * @param userSignUpDto the DTO containing user signup information
-     */
-    public User(UserSignUpDto userSignUpDto) {
-        this.firstName = userSignUpDto.getFirstName();
-        this.lastName = userSignUpDto.getLastName();
-        this.email = userSignUpDto.getEmail();
-        this.password = userSignUpDto.getPassword();
-        this.phoneNumber = userSignUpDto.getPhoneNumber();
-        this.created = LocalDateTime.now();
-        this.deleted = false;
-    }
-
-    /**
-     * Constructor that takes a UserResponseDto.
-     *
-     * @param userResponseDto the DTO containing user response information
-     */
-    public User(UserResponseDto userResponseDto) {
-        this.id = userResponseDto.getId();
-        this.firstName = userResponseDto.getFirstName();
-        this.lastName = userResponseDto.getLastName();
-        this.email = userResponseDto.getEmail();
-        this.phoneNumber = userResponseDto.getPhoneNumber();
-        this.created = userResponseDto.getCreated();
-        this.updated = userResponseDto.getUpdated();
-        this.deleted = userResponseDto.isDeleted();
-    }
-
-    /**
-     * Constructor that takes a UserUpdateDto.
-     *
-     * @param userUpdateDto the DTO containing user update information
-     */
-    public User(UserUpdateDto userUpdateDto) {
-        this.firstName = userUpdateDto.getFirstName();
-        this.lastName = userUpdateDto.getLastName();
-        this.email = userUpdateDto.getEmail();
-        this.password = userUpdateDto.getPassword();
-        this.phoneNumber = userUpdateDto.getPhoneNumber();
-        this.updated = LocalDateTime.now();
-    }
 }

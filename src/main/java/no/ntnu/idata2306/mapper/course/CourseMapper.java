@@ -9,6 +9,7 @@ import no.ntnu.idata2306.model.Review;
 import org.mapstruct.AfterMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.MappingTarget;
+import org.mapstruct.Named;
 import org.mapstruct.factory.Mappers;
 
 /**
@@ -50,6 +51,7 @@ public interface CourseMapper {
      * @param course the Course entity
      * @return the CourseResponseDto
      */
+    @Named("courseToResponseCourseDto")
     CourseResponseDto courseToResponseCourseDto(Course course);
 
     /**
@@ -61,11 +63,16 @@ public interface CourseMapper {
      */
     @AfterMapping
     default void calculateAndSetAverageRating(@MappingTarget CourseResponseDto courseResponseDto, Course course) {
-        double sum = course.getReviews().stream()
-                .mapToDouble(Review::getRating)
-                .sum();
-        double averageRating = sum / course.getReviews().size();
-        courseResponseDto.setAverageRating(averageRating);
-        courseResponseDto.setNumberOfReviews(course.getReviews().size());
+        if (course.getReviews() != null && !course.getReviews().isEmpty()) {
+            double sum = course.getReviews().stream()
+                    .mapToDouble(Review::getRating)
+                    .sum();
+            double averageRating = sum / course.getReviews().size();
+            courseResponseDto.setAverageRating(averageRating);
+            courseResponseDto.setNumberOfReviews(course.getReviews().size());
+        } else {
+            courseResponseDto.setAverageRating(0);
+            courseResponseDto.setNumberOfReviews(0);
+        }
     }
 }

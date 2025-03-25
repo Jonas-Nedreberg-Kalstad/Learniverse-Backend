@@ -1,5 +1,6 @@
 package no.ntnu.idata2306.service;
 
+import io.jsonwebtoken.lang.Collections;
 import lombok.extern.slf4j.Slf4j;
 import no.ntnu.idata2306.dto.course.CourseResponseDto;
 import no.ntnu.idata2306.dto.course.details.CategoryDto;
@@ -18,6 +19,7 @@ import no.ntnu.idata2306.util.ScoreThresholdUtils;
 import no.ntnu.idata2306.util.ScoreUtils;
 import no.ntnu.idata2306.util.SearchUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -50,7 +52,7 @@ public class SearchService {
      *
      * @param criteria  the search criteria containing the course name, category name, and topic name to search for.
      * @param pageable  the pagination information.
-     * @return a SearchResult object containing the scored courses, categories, and topics, along with pagination information.
+     * @return a SearchResult object containing the scored courses, categories, and topics, or null if no results are found.
      */
     public SearchResult search(SearchCriteria criteria, Pageable pageable) {
 
@@ -64,7 +66,7 @@ public class SearchService {
             return null;
         }
 
-        return new SearchResult(courses, categories, topics, pageable);
+        return new SearchResult(courses, categories, topics);
     }
 
 
@@ -157,4 +159,24 @@ public class SearchService {
                 }
         );
     }
+
+
+    /**
+     * Searches for courses based on the provided category ID and a list of topic IDs, and converts them to CourseResponseDto objects.
+     * If no courses are found, an empty list is returned.
+     *
+     * @param request  the request object containing category ID and topic IDs.
+     * @param pageable the pagination information.
+     * @return a list of CourseResponseDto objects representing the courses that match the search criteria, or an empty list if no courses are found.
+     */
+    public List<CourseResponseDto> topicAndCategoryOnlySearch(CategoryAndTopicsSearch request, Pageable pageable) {
+        Page<Course> coursesPage = this.courseRepository.searchCoursesByTopicsAndCategory(request.getCategoryId(), request.getTopicIds(), pageable);
+        if (coursesPage.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return coursesPage.stream()
+                .map(CourseMapper.INSTANCE::courseToResponseCourseDto)
+                .toList();
+    }
+
 }

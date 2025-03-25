@@ -1,15 +1,21 @@
 package no.ntnu.idata2306;
 
 import lombok.extern.slf4j.Slf4j;
+import no.ntnu.idata2306.enums.OrderStatusEnum;
+import no.ntnu.idata2306.enums.PaymentMethodEnum;
 import no.ntnu.idata2306.model.*;
 import no.ntnu.idata2306.model.course.details.*;
 import no.ntnu.idata2306.model.course.Course;
 import no.ntnu.idata2306.model.course.details.Currency;
+import no.ntnu.idata2306.model.payment.OrderStatus;
+import no.ntnu.idata2306.model.payment.PaymentMethod;
+import no.ntnu.idata2306.repository.course.CourseEnrollmentsRepository;
 import no.ntnu.idata2306.repository.course.details.*;
 import no.ntnu.idata2306.repository.course.CourseRepository;
 import no.ntnu.idata2306.repository.*;
 import no.ntnu.idata2306.repository.course.details.RelatedCertificateRepository;
 import no.ntnu.idata2306.repository.course.details.TopicRepository;
+import no.ntnu.idata2306.repository.payment.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
@@ -20,6 +26,7 @@ import org.springframework.stereotype.Component;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Responsible for populating database with dummy data for testing.
@@ -43,12 +50,21 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
 
     private final ReviewRepository reviewRepository;
 
+    private final OrderStatusRepository orderStatusRepository;
+    private final OrderRepository orderRepository;
+    private final PaymentRepository paymentRepository;
+    private final PaymentMethodRepository paymentMethodRepository;
+    private final PaymentCardRepository paymentCardRepository;
+    private final CourseEnrollmentsRepository courseEnrollmentsRepository;
+
     @Autowired
     public DummyDataInitializer(UserRepository userRepository, RoleRepository roleRepository, CourseRepository courseRepository,
                                 CategoryRepository categoryRepository, CreditRepository creditRepository, CurrencyRepository currencyRepository,
                                 DifficultyLevelRepository difficultyLevelRepository, HoursPerWeekRepository hoursPerWeekRepository,
                                 @Lazy PasswordEncoder passwordEncoder, TopicRepository topicRepository, RelatedCertificateRepository relatedCertificateRepository,
-                                ReviewRepository reviewRepository) {
+                                ReviewRepository reviewRepository, OrderStatusRepository orderStatusRepository, CourseEnrollmentsRepository courseEnrollmentsRepository,
+                                OrderRepository orderRepository, PaymentRepository paymentRepository, PaymentMethodRepository paymentMethodRepository,
+                                PaymentCardRepository paymentCardRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.courseRepository = courseRepository;
@@ -61,6 +77,12 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
         this.topicRepository = topicRepository;
         this.relatedCertificateRepository = relatedCertificateRepository;
         this.reviewRepository = reviewRepository;
+        this.orderStatusRepository = orderStatusRepository;
+        this.orderRepository = orderRepository;
+        this.courseEnrollmentsRepository = courseEnrollmentsRepository;
+        this.paymentCardRepository = paymentCardRepository;
+        this.paymentRepository = paymentRepository;
+        this.paymentMethodRepository = paymentMethodRepository;
     }
 
     @Override
@@ -705,6 +727,29 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
                     reviewRepository.save(review);
                 }
             });
+
+
+            // Order Status
+            this.orderStatusRepository.saveAll(
+                    Arrays.stream(OrderStatusEnum.values())
+                            .map(statusEnum -> {
+                                OrderStatus orderStatus = new OrderStatus();
+                                orderStatus.setStatus(statusEnum);
+                                return orderStatus;
+                            })
+                            .toList()
+            );
+
+            // Payment Methods
+            this.paymentMethodRepository.saveAll(
+                    Arrays.stream(PaymentMethodEnum.values())
+                            .map(methodEnum -> {
+                                PaymentMethod paymentMethod = new PaymentMethod();
+                                paymentMethod.setMethod(methodEnum);
+                                return paymentMethod;
+                            })
+                            .toList()
+            );
 
         }
 
