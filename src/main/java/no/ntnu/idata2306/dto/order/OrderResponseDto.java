@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.dto;
+package no.ntnu.idata2306.dto.order;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,6 +19,7 @@ import java.time.LocalDateTime;
 public class OrderResponseDto {
     private int id;
     private BigDecimal price;
+    private String currency;
     private LocalDateTime created;
     private LocalDateTime updated;
     private CourseResponseDto course;

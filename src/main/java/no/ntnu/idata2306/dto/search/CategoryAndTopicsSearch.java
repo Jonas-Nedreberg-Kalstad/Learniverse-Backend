@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -17,4 +18,6 @@ import java.util.List;
 public class CategoryAndTopicsSearch {
     private Integer categoryId;
     private List<Integer> topicIds;
+    private Integer difficultyLevelId;
+    private BigDecimal maxPrice;
 }

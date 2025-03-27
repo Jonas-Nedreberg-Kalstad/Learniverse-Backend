@@ -1,6 +1,6 @@
 package no.ntnu.idata2306.mapper;
 
-import no.ntnu.idata2306.dto.OrderStatusDto;
+import no.ntnu.idata2306.dto.order.OrderStatusDto;
 import no.ntnu.idata2306.model.payment.OrderStatus;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;

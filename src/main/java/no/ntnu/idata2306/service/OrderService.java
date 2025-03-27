@@ -2,13 +2,12 @@ package no.ntnu.idata2306.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import no.ntnu.idata2306.dto.OrderPaymentDto;
-import no.ntnu.idata2306.dto.OrderResponseDto;
+import no.ntnu.idata2306.dto.order.OrderPaymentDto;
+import no.ntnu.idata2306.dto.order.OrderResponseDto;
 import no.ntnu.idata2306.enums.OrderStatusEnum;
 import no.ntnu.idata2306.enums.PaymentMethodEnum;
 import no.ntnu.idata2306.mapper.OrderPaymentMapper;
 import no.ntnu.idata2306.mapper.course.CourseEnrollmentsMapper;
-import no.ntnu.idata2306.mapper.course.CourseMapper;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.model.course.Course;
 import no.ntnu.idata2306.model.course.CourseEnrollments;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -68,6 +66,7 @@ public class OrderService {
         order.setCreated(created);
         order.setUser(user);
         order.setCourse(course);
+        order.setCurrency(course.getCurrency().getCurrency());
         Orders savedOrder = orderRepository.save(order);
         log.info("Order created with ID: {}", savedOrder.getId());
 

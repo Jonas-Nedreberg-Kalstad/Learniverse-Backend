@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.dto;
+package no.ntnu.idata2306.dto.order;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

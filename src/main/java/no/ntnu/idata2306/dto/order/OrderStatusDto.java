@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.dto;
+package no.ntnu.idata2306.dto.order;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

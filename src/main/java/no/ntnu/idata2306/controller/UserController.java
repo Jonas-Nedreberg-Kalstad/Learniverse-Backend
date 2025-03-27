@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import no.ntnu.idata2306.dto.user.UserResponseDto;
 import no.ntnu.idata2306.dto.user.UserSignUpDto;
 import no.ntnu.idata2306.dto.user.UserUpdateDto;
+import no.ntnu.idata2306.mapper.UserMapper;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -85,7 +86,7 @@ public class UserController {
     @GetMapping("/admin/users/{id}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable int id) {
         User user = this.userService.getUserById(id);
-        UserResponseDto foundUser = new UserResponseDto(user);
+        UserResponseDto foundUser = UserMapper.INSTANCE.userToUserResponseDto(user);
         log.info("User found with ID: {}", id);
         return new ResponseEntity<>(foundUser, HttpStatus.OK);
     }

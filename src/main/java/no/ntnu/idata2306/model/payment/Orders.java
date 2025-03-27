@@ -35,6 +35,10 @@ public class Orders {
     @Schema(description = "Order price")
     private BigDecimal price;
 
+    @Column(name = "currency", nullable = false)
+    @Schema(description = "Currency")
+    private String currency;
+
     @Column(name = "created", nullable = false)
     @Schema(description = "Creation date of the order")
     private LocalDateTime created;

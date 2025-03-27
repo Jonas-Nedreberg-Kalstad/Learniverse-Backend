@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import no.ntnu.idata2306.dto.course.CourseListResponseDto;
 import no.ntnu.idata2306.dto.course.CourseResponseDto;
 import no.ntnu.idata2306.dto.search.CategoryAndTopicsSearch;
 import no.ntnu.idata2306.dto.search.SearchCriteria;
@@ -76,11 +77,11 @@ public class SearchController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("findCourseByTopicsAndCategory")
-    public ResponseEntity<List<CourseResponseDto>> searchTopicsAndCourses(@RequestBody CategoryAndTopicsSearch search,
-                                                                          @RequestParam(defaultValue = "0") int page,
-                                                                          @RequestParam(defaultValue = "5") int size) {
+    public ResponseEntity<CourseListResponseDto> searchTopicsAndCourses(@RequestBody CategoryAndTopicsSearch search,
+                                                                        @RequestParam(defaultValue = "0") int page,
+                                                                        @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        List<CourseResponseDto> result = this.searchService.topicAndCategoryOnlySearch(search, pageable);
+        CourseListResponseDto result = this.searchService.advancedIdsAndMaxPriceSearch(search, pageable);
         return ResponseEntity.ok(result);
     }
 }

@@ -15,6 +15,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -82,30 +83,40 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
         return matchedTopics;
     }
 
-
-    Page<Course> findByDifficultyLevelId(Integer difficultyLevelId, Pageable pageable);
-
-    Page<Course> findByActiveAndCategory(Boolean active, Category category, Pageable pageable);
-
-    Page<Course> findByTopicsIn(Collection<Set<Topic>> topics, Pageable pageable);
-
-
     /**
-     * Searches for courses based on the provided category ID and a list of topic IDs.
+     * Searches for courses based on the provided category ID, difficulty level ID, list of topic IDs, and maximum price.
      * The search includes only active courses. Any of the parameters can be null, making them optional in the search criteria.
+     * The results are fetched eagerly to include related topics in the same query.
+     *
+     * The query performs the following:
+     * - Selects courses from the Course entity and eagerly fetches related topics using JOIN FETCH.
+     * - Filters courses based on the provided category ID if it's not null.
+     * - Filters courses based on the provided difficulty level ID if it's not null.
+     * - Ensures only active courses are included in the results.
+     * - Filters courses based on the provided maximum price.
+     * - Uses a sub query to filter courses based on the provided topic IDs. The sub query selects course IDs and joins topics,
+     *   filtering by the provided list of topic IDs.
+     *   It groups results by course ID and checks that the number of distinct topics matches the size of the provided topic IDs list,
+     *   ensuring each course has all specified topics.
      *
      * @param categoryId the ID of the category to search for. Can be null.
      * @param topicIds   the list of topic IDs to search for. Can be null.
+     * @param difficultyLevelId the ID of the difficulty level to search for. Can be null.
+     * @param maxPrice   the maximum price of the courses to search for. Can be null.
      * @param pageable   the pagination information.
      * @return a page of courses that match the search criteria.
      */
     @Query("SELECT course FROM Course course " +
-            "JOIN course.topics t " +
+            "JOIN FETCH course.topics t " +
             "WHERE (:categoryId IS NULL OR course.category.id = :categoryId) " +
-            "AND (:topicIds IS NULL OR t.id IN :topicIds) " +
-            "AND (course.active = true)")
+            "AND (:difficultyLevelId IS NULL OR course.difficultyLevel.id = :difficultyLevelId) " +
+            "AND (course.active = true) " +
+            "AND (:maxPrice IS NULL OR course.price <= :maxPrice) " +
+            "AND course.id IN (SELECT c.id FROM Course c JOIN c.topics t1 WHERE t1.id IN :topicIds GROUP BY c.id HAVING COUNT(DISTINCT t1.id) = :#{#topicIds.size()})")
     Page<Course> searchCoursesByTopicsAndCategory(@Param("categoryId") Integer categoryId,
                                                   @Param("topicIds") List<Integer> topicIds,
+                                                  @Param("difficultyLevelId") Integer difficultyLevelId,
+                                                  @Param("maxPrice") BigDecimal maxPrice,
                                                   Pageable pageable);
 
     /**

@@ -1,7 +1,7 @@
 package no.ntnu.idata2306.mapper;
 
-import no.ntnu.idata2306.dto.OrderPaymentDto;
-import no.ntnu.idata2306.dto.OrderResponseDto;
+import no.ntnu.idata2306.dto.order.OrderPaymentDto;
+import no.ntnu.idata2306.dto.order.OrderResponseDto;
 import no.ntnu.idata2306.exception.CardTokenHashException;
 import no.ntnu.idata2306.mapper.course.CourseMapper;
 import no.ntnu.idata2306.model.payment.Orders;

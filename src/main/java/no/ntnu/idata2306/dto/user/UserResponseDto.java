@@ -25,20 +25,4 @@ public class UserResponseDto {
     private LocalDateTime created;
     private LocalDateTime updated;
     private boolean deleted;
-
-    /**
-     * Constructor that takes a User object.
-     *
-     * @param user the User object containing user information
-     */
-    public UserResponseDto(User user) {
-        this.id = user.getId();
-        this.firstName = user.getFirstName();
-        this.lastName = user.getLastName();
-        this.email = user.getEmail();
-        this.phoneNumber = user.getPhoneNumber();
-        this.created = user.getCreated();
-        this.updated = user.getUpdated();
-        this.deleted = user.isDeleted();
-    }
 }

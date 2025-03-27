@@ -142,22 +142,18 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
             categoryRepository.save(dsaCategory);
 
             // Create credits
-            Credit credit7_5 = new Credit();
-            credit7_5.setCredit(new BigDecimal("7.5"));
 
-            Credit credit2 = new Credit();
-            credit2.setCredit(new BigDecimal("2"));
+            // 0.5 - 30 credit, incremented by 0.5
+            for (double i = 0.5; i <= 30; i += 0.5) {
+                Credit credit = new Credit();
+                credit.setCredit(BigDecimal.valueOf(i));
+                creditRepository.save(credit);
+            }
 
-            Credit credit4 = new Credit();
-            credit4.setCredit(new BigDecimal("4"));
-
-            Credit credit10 = new Credit();
-            credit10.setCredit(new BigDecimal("10"));
-
-            creditRepository.save(credit7_5);
-            creditRepository.save(credit2);
-            creditRepository.save(credit4);
-            creditRepository.save(credit10);
+            Credit credit7_5 = new Credit(15, new BigDecimal("7.5"), null);
+            Credit credit2 = new Credit(4, new BigDecimal("2"), null);
+            Credit credit4 = new Credit(8, new BigDecimal("4"), null);
+            Credit credit10 = new Credit(20, new BigDecimal("10"), null);
 
             // Create currencies
             Currency nok = new Currency();
@@ -184,26 +180,19 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
             difficultyLevelRepository.save(expert);
 
             // Create hours per week
-            HoursPerWeek hours20 = new HoursPerWeek();
-            hours20.setHours(20);
 
-            HoursPerWeek hours40 = new HoursPerWeek();
-            hours40.setHours(40);
+            // 1-50 hours per week
+            for (int i = 1; i <= 50; i++) {
+                HoursPerWeek hoursPerWeek = new HoursPerWeek();
+                hoursPerWeek.setHours(i);
+                hoursPerWeekRepository.save(hoursPerWeek);
+            }
 
-            HoursPerWeek hours10 = new HoursPerWeek();
-            hours10.setHours(10);
-
-            HoursPerWeek hours5 = new HoursPerWeek();
-            hours5.setHours(5);
-
-            HoursPerWeek hours4 = new HoursPerWeek();
-            hours4.setHours(4);
-
-            hoursPerWeekRepository.save(hours20);
-            hoursPerWeekRepository.save(hours40);
-            hoursPerWeekRepository.save(hours10);
-            hoursPerWeekRepository.save(hours5);
-            hoursPerWeekRepository.save(hours4);
+            HoursPerWeek hours20 = new HoursPerWeek(20, 20, null);
+            HoursPerWeek hours40 = new HoursPerWeek(40, 40, null);
+            HoursPerWeek hours10 = new HoursPerWeek(10, 10, null);
+            HoursPerWeek hours5 = new HoursPerWeek(5, 5, null);
+            HoursPerWeek hours4 = new HoursPerWeek(4, 4, null);
 
             // Create related certifications
             RelatedCertificate javaCertification = new RelatedCertificate();

@@ -2,6 +2,7 @@ package no.ntnu.idata2306.service;
 
 import io.jsonwebtoken.lang.Collections;
 import lombok.extern.slf4j.Slf4j;
+import no.ntnu.idata2306.dto.course.CourseListResponseDto;
 import no.ntnu.idata2306.dto.course.CourseResponseDto;
 import no.ntnu.idata2306.dto.course.details.CategoryDto;
 import no.ntnu.idata2306.dto.course.details.TopicDto;
@@ -165,18 +166,21 @@ public class SearchService {
      * Searches for courses based on the provided category ID and a list of topic IDs, and converts them to CourseResponseDto objects.
      * If no courses are found, an empty list is returned.
      *
-     * @param request  the request object containing category ID and topic IDs.
+     * @param request  the request object containing category ID and topic IDs, difficulty level ID, and max price.
      * @param pageable the pagination information.
-     * @return a list of CourseResponseDto objects representing the courses that match the search criteria, or an empty list if no courses are found.
+     * @return a CourseListResponseDto object representing the courses that match the search criteria, or an empty if no courses are found.
      */
-    public List<CourseResponseDto> topicAndCategoryOnlySearch(CategoryAndTopicsSearch request, Pageable pageable) {
-        Page<Course> coursesPage = this.courseRepository.searchCoursesByTopicsAndCategory(request.getCategoryId(), request.getTopicIds(), pageable);
+    public CourseListResponseDto advancedIdsAndMaxPriceSearch(CategoryAndTopicsSearch request, Pageable pageable) {
+        Page<Course> coursesPage = this.courseRepository.searchCoursesByTopicsAndCategory(request.getCategoryId(), request.getTopicIds(),
+                                                                                          request.getDifficultyLevelId(), request.getMaxPrice(), pageable);
         if (coursesPage.isEmpty()) {
-            return Collections.emptyList();
+            return new CourseListResponseDto(Collections.emptyList(), 0);
         }
-        return coursesPage.stream()
+        List<CourseResponseDto> courses =  coursesPage.stream()
                 .map(CourseMapper.INSTANCE::courseToResponseCourseDto)
                 .toList();
+
+        return new CourseListResponseDto(courses, coursesPage.getNumberOfElements());
     }
 
 }

@@ -121,7 +121,7 @@ public class Course {
     @Schema(description = "Reviews the course has gotten")
     private Set<Review> reviews = new LinkedHashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "course_topic",
             joinColumns = @JoinColumn(name = "course_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "topic_id", referencedColumnName = "id")
@@ -129,7 +129,7 @@ public class Course {
     @Schema(description = "Topic(s) of a given course")
     private Set<Topic> topics = new LinkedHashSet<>();
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    @ManyToMany
     @JoinTable(name = "course_related_certificate",
             joinColumns = @JoinColumn(name = "course_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "related_certificate_id", referencedColumnName = "id")

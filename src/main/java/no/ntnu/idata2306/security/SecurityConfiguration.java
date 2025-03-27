@@ -78,6 +78,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasAuthority(AuthorityLevel.ADMIN)
                         .requestMatchers("/api/user/**").hasAnyAuthority(AuthorityLevel.ADMIN, AuthorityLevel.USER, AuthorityLevel.PROVIDER)
+                        .requestMatchers("/api/provider/**").hasAnyAuthority(AuthorityLevel.ADMIN, AuthorityLevel.PROVIDER)
                         .requestMatchers("/api/anonymous/**").permitAll()
                         .requestMatchers("/v3/api-docs/**").hasAuthority(AuthorityLevel.ADMIN)
                         .requestMatchers("/swagger-ui/**").hasAuthority(AuthorityLevel.ADMIN)
