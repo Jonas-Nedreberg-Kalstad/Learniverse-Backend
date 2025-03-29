@@ -106,13 +106,14 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
      * @param pageable   the pagination information.
      * @return a page of courses that match the search criteria.
      */
-    @Query("SELECT course FROM Course course " +
-            "JOIN FETCH course.topics t " +
+    @Query("SELECT DISTINCT course FROM Course course " +
+            "LEFT JOIN FETCH course.topics t " +
             "WHERE (:categoryId IS NULL OR course.category.id = :categoryId) " +
             "AND (:difficultyLevelId IS NULL OR course.difficultyLevel.id = :difficultyLevelId) " +
             "AND (course.active = true) " +
             "AND (:maxPrice IS NULL OR course.price <= :maxPrice) " +
-            "AND course.id IN (SELECT c.id FROM Course c JOIN c.topics t1 WHERE t1.id IN :topicIds GROUP BY c.id HAVING COUNT(DISTINCT t1.id) = :#{#topicIds.size()})")
+            "AND (:topicIds IS NULL OR course.id IN " +
+            "(SELECT c.id FROM Course c JOIN c.topics t1 WHERE t1.id IN :topicIds GROUP BY c.id HAVING COUNT(DISTINCT t1.id) = :#{#topicIds == null ? 0 : #topicIds.size()}))")
     Page<Course> searchCoursesByTopicsAndCategory(@Param("categoryId") Integer categoryId,
                                                   @Param("topicIds") List<Integer> topicIds,
                                                   @Param("difficultyLevelId") Integer difficultyLevelId,

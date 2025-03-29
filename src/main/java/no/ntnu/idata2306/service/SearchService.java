@@ -180,7 +180,7 @@ public class SearchService {
                 .map(CourseMapper.INSTANCE::courseToResponseCourseDto)
                 .toList();
 
-        return new CourseListResponseDto(courses, coursesPage.getNumberOfElements());
+        return new CourseListResponseDto(courses, (int)coursesPage.getTotalElements());
     }
 
 }
