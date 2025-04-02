@@ -6,13 +6,19 @@ import no.ntnu.idata2306.dto.course.CourseListResponseDto;
 import no.ntnu.idata2306.dto.course.CourseResponseDto;
 import no.ntnu.idata2306.dto.course.details.CategoryDto;
 import no.ntnu.idata2306.dto.course.details.TopicDto;
-import no.ntnu.idata2306.dto.search.*;
+import no.ntnu.idata2306.dto.search.request.CategoryAndTopicsSearch;
+import no.ntnu.idata2306.dto.search.request.SearchCriteria;
+import no.ntnu.idata2306.dto.search.response.*;
+import no.ntnu.idata2306.dto.user.UserResponseDto;
+import no.ntnu.idata2306.mapper.UserMapper;
 import no.ntnu.idata2306.mapper.course.CourseMapper;
 import no.ntnu.idata2306.mapper.course.details.CategoryMapper;
 import no.ntnu.idata2306.mapper.course.details.TopicMapper;
+import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.model.course.details.Category;
 import no.ntnu.idata2306.model.course.Course;
 import no.ntnu.idata2306.model.course.details.Topic;
+import no.ntnu.idata2306.repository.UserRepository;
 import no.ntnu.idata2306.repository.course.details.CategoryRepository;
 import no.ntnu.idata2306.repository.course.CourseRepository;
 import no.ntnu.idata2306.repository.course.details.TopicRepository;
@@ -34,12 +40,14 @@ public class SearchService {
     private final CourseRepository courseRepository;
     private final CategoryRepository categoryRepository;
     private final TopicRepository topicRepository;
+    private final UserRepository userRepository;
 
     @Autowired
-    public SearchService(CourseRepository courseRepository, CategoryRepository categoryRepository, TopicRepository topicRepository) {
+    public SearchService(CourseRepository courseRepository, CategoryRepository categoryRepository, TopicRepository topicRepository, UserRepository userRepository) {
         this.courseRepository = courseRepository;
         this.categoryRepository = categoryRepository;
         this.topicRepository = topicRepository;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -82,16 +90,16 @@ public class SearchService {
      * @param pageable   the pagination information.
      * @return a paginated list of scored courses based on the search criteria.
      */
-    public List<ScoredCourse> courseSearch(String courseName, Pageable pageable) {
+    private List<ScoredCourse> courseSearch(String courseName, Pageable pageable) {
         List<Course> courses = courseRepository.findByActiveTrue();
         return SearchUtils.genericSearch(
-                courseName,
+                courseName.toLowerCase(),
                 pageable,
                 courses,
-                Course::getCourseName,
+                course -> course.getCourseName().toLowerCase(),
                 course -> ScoreUtils.calculateAverageNormalizedScore(
-                        Arrays.asList(course.getCourseName().split(" ")),
-                        Arrays.asList(courseName.split(" "))
+                        Arrays.asList(course.getCourseName().toLowerCase().split(" ")),
+                        Arrays.asList(courseName.toLowerCase().split(" "))
                 ),
                 ScoreThresholdUtils.COURSE_SCORE_THRESHOLD,
                 (course, score) -> {
@@ -115,13 +123,13 @@ public class SearchService {
     public List<ScoredCategory> categorySearch(String categoryName, Pageable pageable) {
         List<Category> categories = categoryRepository.findAll();
         return SearchUtils.genericSearch(
-                categoryName,
+                categoryName.toLowerCase(),
                 pageable,
                 categories,
-                Category::getCategory,
+                category -> category.getCategory().toLowerCase(),
                 category -> ScoreUtils.calculateAverageNormalizedScore(
-                        Arrays.asList(category.getCategory().split(" ")),
-                        Arrays.asList(categoryName.split(" "))
+                        Arrays.asList(category.getCategory().toLowerCase().split(" ")),
+                        Arrays.asList(categoryName.toLowerCase().split(" "))
                 ),
                 ScoreThresholdUtils.CATEGORY_SCORE_THRESHOLD,
                 (category, score) -> {
@@ -145,13 +153,13 @@ public class SearchService {
     public List<ScoredTopic> topicSearch(String topicName, Pageable pageable) {
         List<Topic> topics = topicRepository.findAll();
         return SearchUtils.genericSearch(
-                topicName,
+                topicName.toLowerCase(),
                 pageable,
                 topics,
-                Topic::getTopic,
+                topic -> topic.getTopic().toLowerCase(),
                 topic -> ScoreUtils.calculateAverageNormalizedScore(
-                        Arrays.asList(topic.getTopic().split(" ")),
-                        Arrays.asList(topicName.split(" "))
+                        Arrays.asList(topic.getTopic().toLowerCase().split(" ")),
+                        Arrays.asList(topicName.toLowerCase().split(" "))
                 ),
                 ScoreThresholdUtils.TOPIC_SCORE_THRESHOLD,
                 (topic, score) -> {
@@ -161,16 +169,46 @@ public class SearchService {
         );
     }
 
+    /**
+     * Searches for users based on the provided full name and paginates the results.
+     * The scores are calculated using the Levenshtein distance between the search terms and the full names of the users.
+     * The scores are normalized to a percentage to reflect the closeness of the match.
+     * The results are filtered based on predefined score thresholds to ensure relevance.
+     * BK-trees are used to optimize the search process by efficiently finding close matches.
+     *
+     * @param userFullName the full name of the user to search for.
+     * @param pageable     the pagination information.
+     * @return a paginated list of scored users based on the search criteria.
+     */
+    public List<ScoredUser> userSearch(String userFullName, Pageable pageable) {
+        List<User> users = this.userRepository.findByDeletedFalse();
+        return SearchUtils.genericSearch(
+                userFullName.toLowerCase(),
+                pageable,
+                users,
+                user -> (user.getFirstName() + " " + user.getLastName()).toLowerCase(),
+                user -> ScoreUtils.calculateAverageNormalizedScore(
+                        Arrays.asList((user.getFirstName() + " " + user.getLastName()).toLowerCase().split(" ")),
+                        Arrays.asList(userFullName.toLowerCase().split(" "))
+                ),
+                ScoreThresholdUtils.USER_SCORE_THRESHOLD,
+                (user, score) -> {
+                    UserResponseDto userResponseDto = UserMapper.INSTANCE.userToUserResponseDto(user);
+                    return new ScoredUser(userResponseDto, score);
+                }
+        );
+    }
+
 
     /**
-     * Searches for courses based on the provided category ID and a list of topic IDs, and converts them to CourseResponseDto objects.
+     * Filtering for courses based on the provided category ID and a list of topic IDs, and converts them to CourseResponseDto objects.
      * If no courses are found, an empty list is returned.
      *
      * @param request  the request object containing category ID and topic IDs, difficulty level ID, and max price.
      * @param pageable the pagination information.
-     * @return a CourseListResponseDto object representing the courses that match the search criteria, or an empty if no courses are found.
+     * @return a CourseListResponseDto object representing the courses that match the filtering criteria, or an empty object if no courses are found.
      */
-    public CourseListResponseDto advancedIdsAndMaxPriceSearch(CategoryAndTopicsSearch request, Pageable pageable) {
+    public CourseListResponseDto advancedIdsAndMaxPriceFiltering(CategoryAndTopicsSearch request, Pageable pageable) {
         Page<Course> coursesPage = this.courseRepository.searchCoursesByTopicsAndCategory(request.getCategoryId(), request.getTopicIds(),
                                                                                           request.getDifficultyLevelId(), request.getMaxPrice(), pageable);
         if (coursesPage.isEmpty()) {

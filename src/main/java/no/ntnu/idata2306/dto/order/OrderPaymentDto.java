@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 /**
@@ -21,10 +20,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderPaymentDto {
-
-    @NotNull(message = "Price cannot be null")
-    @Positive(message = "Price must be greater than 0")
-    private BigDecimal price;
 
     @Positive(message = "Course ID must be greater than 0")
     private int courseId;

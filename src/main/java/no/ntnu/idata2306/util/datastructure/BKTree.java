@@ -61,7 +61,7 @@ public class BKTree<T> {
      */
     private class Node {
         private final T element;
-        private final Map<Integer, Node> children;
+        private final Map<Integer, List<Node>> children;
 
         /**
          * Constructs a Node with the specified element.
@@ -76,17 +76,15 @@ public class BKTree<T> {
         /**
          * Adds an element to the subtree rooted at this node.
          * The element is placed in the appropriate position based on its edit distance from this node's element.
+         * Using `Map<Integer, List<Node>>` allows for handling multiple nodes at the same distance,
+         * ensuring that elements with identical or nearly identical names are correctly added to the tree.
          *
          * @param element the element to add to the subtree.
          */
         public void add(T element) {
             int distance = StringUtils.damerauLevenshteinDistance(this.element.toString(), element.toString()).getDistance();
-            Node child = children.get(distance);
-            if (child == null) {
-                children.put(distance, new Node(element));
-            } else {
-                child.add(element);
-            }
+            List<Node> childList = children.computeIfAbsent(distance, k -> new ArrayList<>());
+            childList.add(new Node(element));
         }
 
         /**
@@ -103,9 +101,11 @@ public class BKTree<T> {
                 results.add(this.element);
             }
             for (int i = Math.max(0, distance - threshold); i <= distance + threshold; i++) {
-                Node child = children.get(i);
-                if (child != null) {
-                    child.search(query, threshold, results);
+                List<Node> childList = children.get(i);
+                if (childList != null) {
+                    for (Node child : childList) {
+                        child.search(query, threshold, results);
+                    }
                 }
             }
         }

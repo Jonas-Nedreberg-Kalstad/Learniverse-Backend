@@ -70,7 +70,7 @@ public class ReviewService {
      * @return the newly created ReviewResponseDto object
      */
     public ReviewResponseDto createReview(ReviewRequestDto reviewRequestDto, User user) {
-        Course course = courseService.getCourseById(reviewRequestDto.getCourseId());
+        Course course = courseService.findCourseById(reviewRequestDto.getCourseId());
 
         Review review = ReviewMapper.INSTANCE.reviewRequestDtoToReview(reviewRequestDto, user);
         review.setCourse(course);
@@ -87,9 +87,21 @@ public class ReviewService {
      * @return ReviewResponseDto containing the updated review information
      */
     public ReviewResponseDto deleteReview(int id) {
-        Review review = getReviewById(id);
+        Review review = findReviewById(id);
         this.reviewRepository.delete(review);
         log.info("Review marked as deleted with ID: {}", id);
+        return ReviewMapper.INSTANCE.reviewToReviewResponseDto(review);
+    }
+
+    /**
+     * Retrieves a review by its ID and converts it to a ReviewResponseDto.
+     *
+     * @param id the ID of the review to retrieve
+     * @return the ReviewResponseDto object if found
+     * @throws EntityNotFoundException if the review with the specified ID is not found
+     */
+    public ReviewResponseDto getReviewById(int id) {
+        Review review = findReviewById(id);
         return ReviewMapper.INSTANCE.reviewToReviewResponseDto(review);
     }
 
@@ -100,7 +112,7 @@ public class ReviewService {
      * @return the Review object if found
      * @throws EntityNotFoundException if the review with the specified ID is not found
      */
-    public Review getReviewById(int id) {
+    private Review findReviewById(int id) {
         return this.reviewRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("Review not found with ID: {}", id);

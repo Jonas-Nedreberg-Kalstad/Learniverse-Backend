@@ -18,7 +18,7 @@ import java.util.Set;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 @JsonIdentityInfo(generator = ObjectIdGenerators.PropertyGenerator.class, property = "id", scope = Course.class)
 @JsonIgnoreProperties("reviews")
 @Schema(description = "course of a given provider.", name = "course")

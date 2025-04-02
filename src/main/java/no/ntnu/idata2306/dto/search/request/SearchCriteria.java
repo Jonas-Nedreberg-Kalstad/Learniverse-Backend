@@ -1,4 +1,4 @@
-package no.ntnu.idata2306.dto.search;
+package no.ntnu.idata2306.dto.search.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

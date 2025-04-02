@@ -6,6 +6,7 @@ import no.ntnu.idata2306.dto.course.CourseResponseDto;
 import no.ntnu.idata2306.dto.course.CreateCourseDto;
 import no.ntnu.idata2306.dto.course.UpdateCourseDto;
 import no.ntnu.idata2306.mapper.course.CourseMapper;
+import no.ntnu.idata2306.model.Provider;
 import no.ntnu.idata2306.model.course.Course;
 import no.ntnu.idata2306.model.Review;
 import no.ntnu.idata2306.model.User;
@@ -24,15 +25,12 @@ import java.util.List;
 public class CourseService {
 
     private final CourseRepository courseRepository;
+    private final ProviderService providerService;
 
-    /**
-     * Constructs a new instance of CourseService.
-     *
-     * @param courseRepository the repository for managing course data
-     */
     @Autowired
-    public CourseService(CourseRepository courseRepository) {
+    public CourseService(CourseRepository courseRepository, ProviderService providerService) {
         this.courseRepository = courseRepository;
+        this.providerService = providerService;
     }
 
     /**
@@ -119,6 +117,24 @@ public class CourseService {
     }
 
     /**
+     * Creates a new course with the provided information.
+     *
+     * @param createCourseDto the DTO containing the course information
+     * @param user the user that created a course
+     * @param providerId of the course to be created
+     * @return the newly created CourseResponseDto object
+     */
+    public CourseResponseDto createCourseProvider(CreateCourseDto createCourseDto, User user, int providerId) {
+        Course course = CourseMapper.INSTANCE.createCourseDtoToCourse(createCourseDto);
+        Provider provider = this.providerService.findProviderById(providerId);
+        course.setCreated(LocalDateTime.now());
+        course.setCreatedBy(user);
+        course.setProvider(provider);
+        Course newCourse = this.courseRepository.save(course);
+        return CourseMapper.INSTANCE.courseToResponseCourseDto(newCourse);
+    }
+
+    /**
      * Updates an existing course with the provided information.
      *
      * @param id the ID of the course to be updated
@@ -127,7 +143,30 @@ public class CourseService {
      * @return the updated CourseResponseDto object
      */
     public CourseResponseDto updateCourse(int id, UpdateCourseDto updateCourseDto, User user) {
-        Course course = getCourseById(id);
+        Course course = findCourseById(id);
+        CourseMapper.INSTANCE.updateCourseFromDto(updateCourseDto, course);
+        course.setUpdated(LocalDateTime.now());
+        course.setUpdatedBy(user);
+        Course updatedCourse = this.courseRepository.save(course);
+        return CourseMapper.INSTANCE.courseToResponseCourseDto(updatedCourse);
+    }
+
+    /**
+     * Updates an existing course with the provided information.
+     *
+     * @param id the ID of the course to be updated
+     * @param updateCourseDto the DTO containing the updated course information
+     * @param user the user that updated a course
+     * @param providerId the course to be updated
+     * @return the updated CourseResponseDto object, or null if the course provider ID does not match the updater's provider ID
+     */
+    public CourseResponseDto updateCourseProvider(int id, UpdateCourseDto updateCourseDto, User user, int providerId) {
+        Course course = findCourseById(id);
+
+        if (course.getProvider().getId() != providerId){
+            return null;
+        }
+
         CourseMapper.INSTANCE.updateCourseFromDto(updateCourseDto, course);
         course.setUpdated(LocalDateTime.now());
         course.setUpdatedBy(user);
@@ -142,7 +181,7 @@ public class CourseService {
      * @return CourseResponseDto containing the updated course information
      */
     public CourseResponseDto deactivateCourse(int id) {
-        Course course = getCourseById(id);
+        Course course = findCourseById(id);
         course.setActive(false);
         this.courseRepository.save(course);
         return CourseMapper.INSTANCE.courseToResponseCourseDto(course);
@@ -162,14 +201,29 @@ public class CourseService {
     }
 
     /**
+     * Retrieves a course by its ID and converts it to a CourseResponseDto.
+     *
+     * @param id the ID of the course to retrieve
+     * @return the CourseResponseDto object if found
+     * @throws EntityNotFoundException if the course with the specified ID is not found
+     */
+    public CourseResponseDto getCourseById(int id) {
+        Course course = findCourseById(id);
+        return CourseMapper.INSTANCE.courseToResponseCourseDto(course);
+    }
+
+    /**
      * Finds a course by its ID.
      *
      * @param id the ID of the course to be found
      * @return the Course object if found
      * @throws EntityNotFoundException if the course with the specified ID is not found
      */
-    public Course getCourseById(int id) {
+    public Course findCourseById(int id) {
         return this.courseRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Course not found with ID: " + id));
+                .orElseThrow(() -> {
+                    log.error("Course not found with ID: {}", id);
+                    return new EntityNotFoundException("Course not found with ID: " + id);
+                });
     }
 }

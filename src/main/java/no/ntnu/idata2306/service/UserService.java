@@ -31,7 +31,7 @@ public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RoleRepository roleRepository;
+    private final RoleService roleService;
 
     /**
      * Constructs a new instance of UserService.
@@ -39,13 +39,13 @@ public class UserService implements UserDetailsService {
      *
      * @param userRepository the repository for managing user data
      * @param passwordEncoder the password encoder for hashing passwords
-     * @param roleRepository the repository for managing role data
+     * @param roleService the service for executing role logic
      */
     @Autowired
-    public UserService(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
+    public UserService(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder, RoleService roleService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-        this.roleRepository = roleRepository;
+        this.roleService = roleService;
     }
 
     /**
@@ -85,6 +85,20 @@ public class UserService implements UserDetailsService {
     }
 
     /**
+     * Creates a new provider user with the provided sign-up information.
+     *
+     * @param userSignUpDto the DTO containing the user's sign-up information
+     * @return the newly created UserResponseDto object
+     */
+    public UserResponseDto createProviderUser(UserSignUpDto userSignUpDto) {
+        User user = UserMapper.INSTANCE.userSignupDtoToUserWithPassword(userSignUpDto, this.passwordEncoder);
+        setRole(user, AuthorityLevel.PROVIDER);
+        user.setCreated(LocalDateTime.now());
+        this.userRepository.save(user);
+        return UserMapper.INSTANCE.userToUserResponseDto(user);
+    }
+
+    /**
      * Updates an existing user with the provided information.
      *
      * @param id the ID of the user to be updated
@@ -92,7 +106,7 @@ public class UserService implements UserDetailsService {
      * @return the updated UserResponseDto object
      */
     public UserResponseDto updateUser(int id, UserUpdateDto userUpdateDto) {
-        User user = getUserById(id);
+        User user = findUserById(id);
         UserMapper.INSTANCE.updateUserFromDtoWithPassword(userUpdateDto, user, this.passwordEncoder);
         userRepository.save(user);
         log.info("User was updated successfully with ID: {}", id);
@@ -106,10 +120,22 @@ public class UserService implements UserDetailsService {
      * @return UserResponseDto containing the updated user information
      */
     public UserResponseDto softDeleteUser(int id) {
-        User user = getUserById(id);
+        User user = findUserById(id);
         user.setDeleted(true);
         this.userRepository.save(user);
         log.info("User marked as deleted with ID: {}", id);
+        return UserMapper.INSTANCE.userToUserResponseDto(user);
+    }
+
+    /**
+     * Retrieves a user by their ID and converts it to a UserResponseDto.
+     *
+     * @param id the ID of the user to retrieve
+     * @return the UserResponseDto object if found
+     * @throws EntityNotFoundException if the user with the specified ID is not found
+     */
+    public UserResponseDto getUserById(int id) {
+        User user = findUserById(id);
         return UserMapper.INSTANCE.userToUserResponseDto(user);
     }
 
@@ -120,7 +146,7 @@ public class UserService implements UserDetailsService {
      * @return the User object if found
      * @throws EntityNotFoundException if the user with the specified ID is not found
      */
-    public User getUserById(int id) {
+    private User findUserById(int id) {
         return this.userRepository.findById(id)
                 .orElseThrow(() -> {
                     log.error("User not found with ID: {}", id);
@@ -136,8 +162,8 @@ public class UserService implements UserDetailsService {
      * @throws EntityNotFoundException if the specified role is not found
      */
     public void setRole(User user, String roleName){
-        Role userRole = this.roleRepository.findByRole(roleName).orElseThrow(() -> new EntityNotFoundException("Role " + roleName + " not found"));
-        user.getRoles().add(userRole);
+        Role role = this.roleService.findRoleByRoleName(roleName);
+        user.getRoles().add(role);
     }
 
     /**

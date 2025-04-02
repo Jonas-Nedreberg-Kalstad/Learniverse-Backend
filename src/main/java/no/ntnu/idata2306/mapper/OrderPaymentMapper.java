@@ -28,17 +28,7 @@ public interface OrderPaymentMapper {
      * @return the Orders entity
      */
     @Mapping(source = "courseId", target = "course.id")
-    @Mapping(source = "price", target = "price")
     Orders toOrder(OrderPaymentDto orderPaymentDto);
-
-    /**
-     * Converts an OrderPaymentDto to a Payment entity.
-     *
-     * @param orderPaymentDto the DTO containing payment information
-     * @return the Payment entity
-     */
-    @Mapping(source = "price", target = "amount")
-    Payment toPayment(OrderPaymentDto orderPaymentDto);
 
     /**
      * Converts an OrderPaymentDto to a PaymentCard entity.

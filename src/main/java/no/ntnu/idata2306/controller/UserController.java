@@ -85,10 +85,9 @@ public class UserController {
     })
     @GetMapping("/admin/users/{id}")
     public ResponseEntity<UserResponseDto> getUser(@PathVariable int id) {
-        User user = this.userService.getUserById(id);
-        UserResponseDto foundUser = UserMapper.INSTANCE.userToUserResponseDto(user);
+        UserResponseDto user = this.userService.getUserById(id);
         log.info("User found with ID: {}", id);
-        return new ResponseEntity<>(foundUser, HttpStatus.OK);
+        return new ResponseEntity<>(user, HttpStatus.OK);
     }
 
     /**
@@ -108,6 +107,27 @@ public class UserController {
     @PostMapping("/anonymous/register")
     public ResponseEntity<UserResponseDto> createUser(@Valid @RequestBody UserSignUpDto userSignUpDto) {
         UserResponseDto createdUser = this.userService.createUser(userSignUpDto);
+        log.info("User created with ID: {}", createdUser.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+    }
+
+    /**
+     * Creates a new user.
+     * Error code 400 and 500 is handled by global exception handler.
+     *
+     * @param userSignUpDto the DTO containing user sign-up information
+     * @return ResponseEntity with the created UserResponseDto object and HTTP status
+     * @apiNote The password hash is not returned in the response for security reasons.
+     */
+    @Operation(summary = "Create a new user", description = "Creates a new user with the provided sign-up information.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/admin/register")
+    public ResponseEntity<UserResponseDto> createProviderUser(@Valid @RequestBody UserSignUpDto userSignUpDto) {
+        UserResponseDto createdUser = this.userService.createProviderUser(userSignUpDto);
         log.info("User created with ID: {}", createdUser.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
     }

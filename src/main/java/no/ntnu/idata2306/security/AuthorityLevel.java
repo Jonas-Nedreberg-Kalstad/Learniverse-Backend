@@ -16,4 +16,8 @@ public class AuthorityLevel {
      * Represents the authentication level for providers
      */
     public static final String PROVIDER = "PROVIDER";
+
+    private AuthorityLevel(){
+
+    }
 }

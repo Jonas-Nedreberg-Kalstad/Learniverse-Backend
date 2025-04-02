@@ -94,10 +94,9 @@ public class ReviewController {
     })
     @GetMapping("/admin/reviews/{id}")
     public ResponseEntity<ReviewResponseDto> getReview(@PathVariable int id) {
-        Review review = this.reviewService.getReviewById(id);
-        ReviewResponseDto foundReview = ReviewMapper.INSTANCE.reviewToReviewResponseDto(review);
+        ReviewResponseDto review = this.reviewService.getReviewById(id);
         log.info("Review found with ID: {}", id);
-        return new ResponseEntity<>(foundReview, HttpStatus.OK);
+        return new ResponseEntity<>(review, HttpStatus.OK);
     }
 
     /**

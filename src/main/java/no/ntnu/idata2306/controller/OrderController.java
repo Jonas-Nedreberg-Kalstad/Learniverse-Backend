@@ -21,11 +21,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Slf4j
 @Validated
 @RestController
 @CrossOrigin()
-@RequestMapping("/api/user/orders")
+@RequestMapping("/api")
 @Tag(name = "Order API", description = "Endpoints for orders")
 public class OrderController {
 
@@ -52,12 +54,67 @@ public class OrderController {
             @ApiResponse(responseCode = "422", description = "Error occurred while hashing the card token"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping(value = "/create", consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/user/orders/create", consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<OrderResponseDto> createOrder(@Valid @RequestBody OrderPaymentDto orderPaymentDto) {
         User user = this.userService.getSessionUser();
         OrderResponseDto createdOrder = this.orderService.processOrderPaymentWithDebitCard(orderPaymentDto, user);
         log.info("Order created with ID: {}", createdOrder.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(createdOrder);
     }
+
+
+    /**
+     * Retrieves all orders.
+     * Error code 500 is handled by global exception handler.
+     *
+     * @return a list of OrderResponseDto objects representing all orders.
+     */
+    @Operation(summary = "Get all orders", description = "Retrieves a list of all orders.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Orders retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrderResponseDto.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/admin/orders")
+    public List<OrderResponseDto> getAllOrders() {
+        return orderService.getAllOrders();
+    }
+
+    /**
+     * Retrieves an order by its ID.
+     * Error code 404 and 500 is handled by global exception handler.
+     *
+     * @param id the ID of the order to retrieve
+     * @return ResponseEntity with the OrderResponseDto object and HTTP status
+     */
+    @Operation(summary = "Get order by ID", description = "Retrieves an order by its ID.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Order retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrderResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "Order not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/admin/orders/{id}")
+    public ResponseEntity<OrderResponseDto> getOrderById(@PathVariable int id) {
+        OrderResponseDto order = orderService.getOrderById(id);
+        log.info("Order found with ID: {}", id);
+        return new ResponseEntity<>(order, HttpStatus.OK);
+    }
+
+    /**
+     * Retrieves order history for a given user.
+     * Error code 500 is handled by global exception handler.
+     *
+     * @return a list of OrderResponseDto objects representing the user's order history.
+     */
+    @Operation(summary = "Get all orders for a user", description = "Retrieves all orders for a given user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Orders retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = OrderResponseDto.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/user/orders/history")
+    public List<OrderResponseDto> getOrdersHistory() {
+        User user = userService.getSessionUser();
+        return orderService.getOrdersHistory(user);
+    }
+
 
 }

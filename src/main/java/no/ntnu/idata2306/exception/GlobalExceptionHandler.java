@@ -1,5 +1,6 @@
 package no.ntnu.idata2306.exception;
 
+import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import java.util.*;
  * Global exception handler for handling validation and custom exceptions across the application.
  */
 @Slf4j
+@Hidden
 @ControllerAdvice
 public class GlobalExceptionHandler {
 

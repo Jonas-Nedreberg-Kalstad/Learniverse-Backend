@@ -80,9 +80,9 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/user/**").hasAnyAuthority(AuthorityLevel.ADMIN, AuthorityLevel.USER, AuthorityLevel.PROVIDER)
                         .requestMatchers("/api/provider/**").hasAnyAuthority(AuthorityLevel.ADMIN, AuthorityLevel.PROVIDER)
                         .requestMatchers("/api/anonymous/**").permitAll()
-                        .requestMatchers("/v3/api-docs/**").hasAuthority(AuthorityLevel.ADMIN)
-                        .requestMatchers("/swagger-ui/**").hasAuthority(AuthorityLevel.ADMIN)
-                        .requestMatchers("/swagger-ui.html").hasAuthority(AuthorityLevel.ADMIN)
+                        .requestMatchers("/v3/api-docs/**").permitAll() //.hasAuthority(AuthorityLevel.ADMIN)
+                        .requestMatchers("/swagger-ui/**").permitAll() //.hasAuthority(AuthorityLevel.ADMIN)
+                        .requestMatchers("/swagger-ui.html").permitAll() //.hasAuthority(AuthorityLevel.ADMIN)
                         .anyRequest().authenticated())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(this.jwtFilter, UsernamePasswordAuthenticationFilter.class);

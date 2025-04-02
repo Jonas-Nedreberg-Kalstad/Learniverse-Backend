@@ -5,9 +5,7 @@ import no.ntnu.idata2306.util.datastructure.BKTree;
 import no.ntnu.idata2306.util.datastructure.BKTreeInitializer;
 import org.springframework.data.domain.Pageable;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
@@ -37,9 +35,11 @@ public class SearchUtils {
 
     /**
      * Searches for items based on the provided search term and paginates the results.
+     * All items with names matching the search term are considered.
      * The scores are calculated using the Levenshtein distance between the search terms and the names of the items.
      * The scores are normalized to a percentage to reflect the closeness of the match.
      * The results are filtered based on predefined score thresholds to ensure relevance.
+     * Only unique items with scores exceeding the threshold are added to the list.
      * BK-trees are used to optimize the search process by efficiently finding close matches.
      *
      * @param <T> the type of items to search for.
@@ -68,13 +68,14 @@ public class SearchUtils {
         List<S> scoredItems = new ArrayList<>();
 
         for (String name : results) {
-            T item = data.stream().filter(i -> extractor.apply(i).equals(name)).findFirst().orElse(null);
-            if (item != null) {
-                double score = scorer.applyAsDouble(item);
-                if (score > threshold) {
-                    scoredItems.add(scorerConstructor.apply(item, score));
-                }
-            }
+            data.stream()
+                    .filter(i -> extractor.apply(i).equals(name))
+                    .forEach(item -> {
+                        double score = scorer.applyAsDouble(item);
+                        if (score > threshold) {
+                            scoredItems.add(scorerConstructor.apply(item, score));
+                        }
+                    });
         }
 
         return sortAndPaginate(scoredItems, pageable);

@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -44,6 +45,57 @@ public class OrderService {
         this.paymentCardRepository = paymentCardRepository;
     }
 
+
+    /**
+     * Retrieves all orders from the repository and converts them to OrderResponseDto objects.
+     *
+     * @return a list of OrderResponseDto objects representing all orders.
+     */
+    public List<OrderResponseDto> getAllOrders() {
+        return this.orderRepository.findAll().stream()
+                .map(OrderPaymentMapper.INSTANCE::ordersToOrderResponseDto)
+                .toList();
+    }
+
+    /**
+     * Finds an order by its ID.
+     *
+     * @param id the ID of the order to be found
+     * @return the Order object if found
+     * @throws EntityNotFoundException if the order with the specified ID is not found
+     */
+    private Orders findOrderById(int id) {
+        return this.orderRepository.findById(id)
+                .orElseThrow(() -> {
+                    log.error("Order not found with ID: {}", id);
+                    return new EntityNotFoundException("Order not found with ID: " + id);
+                });
+    }
+
+    /**
+     * Retrieves an order by its ID and converts it to a OrderResponseDto.
+     *
+     * @param id the ID of the order to retrieve
+     * @return the OrderResponseDto object if found
+     * @throws EntityNotFoundException if the order with the specified ID is not found
+     */
+    public OrderResponseDto getOrderById(int id) {
+        Orders order = findOrderById(id);
+        return OrderPaymentMapper.INSTANCE.ordersToOrderResponseDto(order);
+    }
+
+    /**
+     * Retrieves order history for a given user from the repository and converts them to OrderResponseDto objects.
+     *
+     * @param user the user whose orders are to be retrieved.
+     * @return a list of OrderResponseDto objects representing the order history.
+     */
+    public List<OrderResponseDto> getOrdersHistory(User user){
+        return this.orderRepository.findByUserId(user.getId()).stream()
+                .map(OrderPaymentMapper.INSTANCE::ordersToOrderResponseDto)
+                .toList();
+    }
+
     /**
      * Processes an order payment using a debit card and enrolls the user in the course.
      * This method creates a new order, adds payment card information, processes the payment, and updates the order status.
@@ -58,7 +110,7 @@ public class OrderService {
     public OrderResponseDto processOrderPaymentWithDebitCard(OrderPaymentDto orderPaymentDto, User user) {
         LocalDateTime created = LocalDateTime.now();
 
-        Course course = courseService.getCourseById(orderPaymentDto.getCourseId());
+        Course course = courseService.findCourseById(orderPaymentDto.getCourseId());
 
         // Create the order
         Orders order = OrderPaymentMapper.INSTANCE.toOrder(orderPaymentDto);
@@ -66,6 +118,7 @@ public class OrderService {
         order.setCreated(created);
         order.setUser(user);
         order.setCourse(course);
+        order.setPrice(course.getPrice());
         order.setCurrency(course.getCurrency().getCurrency());
         Orders savedOrder = orderRepository.save(order);
         log.info("Order created with ID: {}", savedOrder.getId());
@@ -77,8 +130,9 @@ public class OrderService {
         paymentCardRepository.save(paymentCard);
 
         // Process the payment
-        Payment payment = OrderPaymentMapper.INSTANCE.toPayment(orderPaymentDto);
+        Payment payment = new Payment();
         payment.setCreated(created);
+        payment.setAmount(course.getPrice());
         PaymentMethod paymentMethod = paymentMethodRepository.findByMethod(PaymentMethodEnum.DEBIT_CARD);
         payment.setPaymentMethod(paymentMethod);
         payment.setPaymentCard(paymentCard);
