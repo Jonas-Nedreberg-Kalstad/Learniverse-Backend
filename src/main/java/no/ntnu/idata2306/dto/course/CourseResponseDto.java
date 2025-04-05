@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import no.ntnu.idata2306.dto.ProviderResponseDto;
 import no.ntnu.idata2306.dto.course.details.*;
 
 import java.math.BigDecimal;
@@ -34,6 +35,7 @@ public class CourseResponseDto {
     private double averageRating;
     private int numberOfReviews;
 
+    private ProviderResponseDto provider;
     private CategoryDto category;
     private CreditDto credit;
     private CurrencyDto currency;

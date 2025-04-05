@@ -102,6 +102,7 @@ public class SearchService {
                         Arrays.asList(courseName.toLowerCase().split(" "))
                 ),
                 ScoreThresholdUtils.COURSE_SCORE_THRESHOLD,
+                Course::getId,
                 (course, score) -> {
                     CourseResponseDto courseDto = CourseMapper.INSTANCE.courseToResponseCourseDto(course);
                     return new ScoredCourse(courseDto, score);
@@ -132,6 +133,7 @@ public class SearchService {
                         Arrays.asList(categoryName.toLowerCase().split(" "))
                 ),
                 ScoreThresholdUtils.CATEGORY_SCORE_THRESHOLD,
+                Category::getId,
                 (category, score) -> {
                     CategoryDto categoryDto = CategoryMapper.INSTANCE.categoryToCategoryDto(category);
                     return new ScoredCategory(categoryDto, score);
@@ -162,6 +164,7 @@ public class SearchService {
                         Arrays.asList(topicName.toLowerCase().split(" "))
                 ),
                 ScoreThresholdUtils.TOPIC_SCORE_THRESHOLD,
+                Topic::getId,
                 (topic, score) -> {
                     TopicDto topicDto = TopicMapper.INSTANCE.topicToTopicDto(topic);
                     return new ScoredTopic(topicDto, score);
@@ -192,6 +195,7 @@ public class SearchService {
                         Arrays.asList(userFullName.toLowerCase().split(" "))
                 ),
                 ScoreThresholdUtils.USER_SCORE_THRESHOLD,
+                User::getId,
                 (user, score) -> {
                     UserResponseDto userResponseDto = UserMapper.INSTANCE.userToUserResponseDto(user);
                     return new ScoredUser(userResponseDto, score);

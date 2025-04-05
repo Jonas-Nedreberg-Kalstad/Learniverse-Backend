@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
 
 /**
  * SearchUtils is a utility class that provides methods for sorting and paginating scored items.
@@ -50,6 +51,7 @@ public class SearchUtils {
      * @param extractor a function that extracts the string representation from the items.
      * @param scorer a function that calculates the score for the items.
      * @param threshold the score threshold to filter the results.
+     * @param uniqueIdentifierExtractor a function that extracts a unique identifier from the items.
      * @param scorerConstructor a function that creates a scored item from the item and its score.
      * @return a paginated list of scored items based on the search criteria.
      */
@@ -60,20 +62,26 @@ public class SearchUtils {
             Function<T, String> extractor,
             ToDoubleFunction<T> scorer,
             double threshold,
+            ToIntFunction<T> uniqueIdentifierExtractor,
             BiFunction<T, Double, S> scorerConstructor
     ) {
         BKTree<String> tree = BKTreeInitializer.initializeBKTree(data, extractor);
 
         List<String> results = tree.search(searchTerm, 20);
         List<S> scoredItems = new ArrayList<>();
+        Set<Integer> uniqueIdentifiers = new HashSet<>();
 
         for (String name : results) {
             data.stream()
                     .filter(i -> extractor.apply(i).equals(name))
                     .forEach(item -> {
-                        double score = scorer.applyAsDouble(item);
-                        if (score > threshold) {
-                            scoredItems.add(scorerConstructor.apply(item, score));
+                        Integer uniqueIdentifier = uniqueIdentifierExtractor.applyAsInt(item);
+                        if (!uniqueIdentifiers.contains(uniqueIdentifier)) {
+                            double score = scorer.applyAsDouble(item);
+                            if (score > threshold) {
+                                scoredItems.add(scorerConstructor.apply(item, score));
+                                uniqueIdentifiers.add(uniqueIdentifier);
+                            }
                         }
                     });
         }
