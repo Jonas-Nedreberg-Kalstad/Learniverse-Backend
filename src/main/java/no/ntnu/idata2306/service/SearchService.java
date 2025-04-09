@@ -52,7 +52,7 @@ public class SearchService {
 
     /**
      * Searches for courses, categories, and topics based on the provided search criteria and calculates their relevance scores.
-     * The scores are calculated using the Levenshtein distance between the search terms and the names of the courses, categories, and topics.
+     * The scores are calculated using Damerau-Levenshtein distance for fuzzy matching.
      * The scores are normalized to a percentage to reflect the closeness of the match.
      * The results are filtered based on predefined score thresholds to ensure relevance.
      * The results are sorted by their scores in descending order to prioritize the most relevant matches.
@@ -64,43 +64,51 @@ public class SearchService {
      * @return a SearchResult object containing the scored courses, categories, and topics, or null if no results are found.
      */
     public SearchResult search(SearchCriteria criteria, Pageable pageable) {
+        // Validate and prepare search inputs
+        String courseName = criteria.getCourseName() != null ? criteria.getCourseName().trim().toLowerCase() : "";
+        String topicName = criteria.getTopicName() != null ? criteria.getTopicName().trim().toLowerCase() : "";
+        String categoryName = criteria.getCategoryName() != null ? criteria.getCategoryName().trim().toLowerCase() : "";
 
-        List<ScoredCourse> courses = this.courseSearch(criteria.getCourseName(), pageable);
+        List<ScoredCourse> courses = this.courseSearch(courseName, pageable);
 
-        List<ScoredTopic> topics = this.topicSearch(criteria.getTopicName(), pageable);
+        List<ScoredTopic> topics = this.topicSearch(topicName, pageable);
 
-        List<ScoredCategory> categories = this.categorySearch(criteria.getCategoryName(), pageable);
+        List<ScoredCategory> categories = this.categorySearch(categoryName, pageable);
 
-        if (courses.isEmpty() && topics.isEmpty() && categories.isEmpty()){
+        if (courses.isEmpty() && topics.isEmpty() && categories.isEmpty()) {
             return null;
         }
 
         return new SearchResult(courses, categories, topics);
     }
 
-
     /**
      * Searches for courses based on the provided course name and paginates the results.
-     * The scores are calculated using the Levenshtein distance between the search terms and the names of the courses.
-     * The scores are normalized to a percentage to reflect the closeness of the match.
-     * The results are filtered based on predefined score thresholds to ensure relevance.
-     * BK-trees are used to optimize the search process by efficiently finding close matches.
+     * Uses the hybrid similarity approach with BK-Tree for efficient candidate retrieval.
+     * Course names tend to be longer and may contain multiple words, making them well-suited
+     * for our approach which uses Damerau-Levenshtein distance for fuzzy matching.
      *
      * @param courseName the name of the course to search for.
      * @param pageable   the pagination information.
      * @return a paginated list of scored courses based on the search criteria.
      */
     private List<ScoredCourse> courseSearch(String courseName, Pageable pageable) {
+        if (courseName == null || courseName.isEmpty()) {
+            return List.of();
+        }
+        
         List<Course> courses = courseRepository.findByActiveTrue();
+        
         return SearchUtils.genericSearch(
-                courseName.toLowerCase(),
+                courseName,
                 pageable,
                 courses,
-                course -> course.getCourseName().toLowerCase(),
-                course -> ScoreUtils.calculateAverageNormalizedScore(
-                        Arrays.asList(course.getCourseName().toLowerCase().split(" ")),
-                        Arrays.asList(courseName.toLowerCase().split(" "))
-                ),
+                Course::getCourseName,
+                course -> {
+                    List<String> correctWords = Arrays.asList(course.getCourseName().toLowerCase().split("\\s+"));
+                    List<String> searchWords = Arrays.asList(courseName.toLowerCase().split("\\s+"));
+                    return ScoreUtils.calculateSimilarityScore(correctWords, searchWords);
+                },
                 ScoreThresholdUtils.COURSE_SCORE_THRESHOLD,
                 Course::getId,
                 (course, score) -> {
@@ -112,26 +120,31 @@ public class SearchService {
 
     /**
      * Searches for categories based on the provided category name and paginates the results.
-     * The scores are calculated using the Levenshtein distance between the search terms and the names of the categories.
-     * The scores are normalized to a percentage to reflect the closeness of the match.
-     * The results are filtered based on predefined score thresholds to ensure relevance.
-     * BK-trees are used to optimize the search process by efficiently finding close matches.
+     * Category names vary in length but are typically short to medium phrases.
+     * The hybrid similarity approach works well here by using Damerau-Levenshtein distance for fuzzy matching.
      *
      * @param categoryName the name of the category to search for.
      * @param pageable     the pagination information.
      * @return a paginated list of scored categories based on the search criteria.
      */
     public List<ScoredCategory> categorySearch(String categoryName, Pageable pageable) {
+        if (categoryName == null || categoryName.isEmpty()) {
+            return List.of();
+        }
+        
         List<Category> categories = categoryRepository.findAll();
+        
         return SearchUtils.genericSearch(
-                categoryName.toLowerCase(),
+                categoryName,
                 pageable,
                 categories,
                 category -> category.getCategory().toLowerCase(),
-                category -> ScoreUtils.calculateAverageNormalizedScore(
-                        Arrays.asList(category.getCategory().toLowerCase().split(" ")),
-                        Arrays.asList(categoryName.toLowerCase().split(" "))
-                ),
+                category -> {
+                    List<String> correctWords = Arrays.asList(category.getCategory().toLowerCase().split("\\s+"));
+                    List<String> searchWords = Arrays.asList(categoryName.toLowerCase().split("\\s+"));
+                    
+                    return ScoreUtils.calculateSimilarityScore(correctWords, searchWords);
+                },
                 ScoreThresholdUtils.CATEGORY_SCORE_THRESHOLD,
                 Category::getId,
                 (category, score) -> {
@@ -143,26 +156,32 @@ public class SearchService {
 
     /**
      * Searches for topics based on the provided topic name and paginates the results.
-     * The scores are calculated using the Levenshtein distance between the search terms and the names of the topics.
-     * The scores are normalized to a percentage to reflect the closeness of the match.
-     * The results are filtered based on predefined score thresholds to ensure relevance.
-     * BK-trees are used to optimize the search process by efficiently finding close matches.
+     * Topic names can be short terms or medium-length phrases.
+     * The hybrid similarity approach using Damerau-Levenshtein distance automatically adapts 
+     * to the length and structure of the text.
      *
      * @param topicName the name of the topic to search for.
      * @param pageable  the pagination information.
      * @return a paginated list of scored topics based on the search criteria.
      */
     public List<ScoredTopic> topicSearch(String topicName, Pageable pageable) {
+        if (topicName == null || topicName.isEmpty()) {
+            return List.of();
+        }
+        
         List<Topic> topics = topicRepository.findAll();
+        
         return SearchUtils.genericSearch(
-                topicName.toLowerCase(),
+                topicName,
                 pageable,
                 topics,
                 topic -> topic.getTopic().toLowerCase(),
-                topic -> ScoreUtils.calculateAverageNormalizedScore(
-                        Arrays.asList(topic.getTopic().toLowerCase().split(" ")),
-                        Arrays.asList(topicName.toLowerCase().split(" "))
-                ),
+                topic -> {
+                    List<String> correctWords = Arrays.asList(topic.getTopic().toLowerCase().split("\\s+"));
+                    List<String> searchWords = Arrays.asList(topicName.toLowerCase().split("\\s+"));
+                    return ScoreUtils.calculateSimilarityScore(correctWords, searchWords);
+
+                },
                 ScoreThresholdUtils.TOPIC_SCORE_THRESHOLD,
                 Topic::getId,
                 (topic, score) -> {
@@ -174,26 +193,32 @@ public class SearchService {
 
     /**
      * Searches for users based on the provided full name and paginates the results.
-     * The scores are calculated using the Levenshtein distance between the search terms and the full names of the users.
-     * The scores are normalized to a percentage to reflect the closeness of the match.
-     * The results are filtered based on predefined score thresholds to ensure relevance.
-     * BK-trees are used to optimize the search process by efficiently finding close matches.
+     * Usernames require special handling since first and last names may be entered in any order.
+     * The word-level fuzzy matching with Damerau-Levenshtein distance is especially valuable here.
      *
      * @param userFullName the full name of the user to search for.
      * @param pageable     the pagination information.
      * @return a paginated list of scored users based on the search criteria.
      */
     public List<ScoredUser> userSearch(String userFullName, Pageable pageable) {
+        if (userFullName == null || userFullName.isEmpty()) {
+            return List.of();
+        }
+        
         List<User> users = this.userRepository.findByDeletedFalse();
+        
         return SearchUtils.genericSearch(
                 userFullName.toLowerCase(),
                 pageable,
                 users,
                 user -> (user.getFirstName() + " " + user.getLastName()).toLowerCase(),
-                user -> ScoreUtils.calculateAverageNormalizedScore(
-                        Arrays.asList((user.getFirstName() + " " + user.getLastName()).toLowerCase().split(" ")),
-                        Arrays.asList(userFullName.toLowerCase().split(" "))
-                ),
+                user -> {
+                    String userName = (user.getFirstName() + " " + user.getLastName()).toLowerCase();
+                    List<String> correctWords = Arrays.asList(userName.split("\\s+"));
+                    List<String> searchWords = Arrays.asList(userFullName.toLowerCase().split("\\s+"));
+                    
+                    return ScoreUtils.calculateSimilarityScore(correctWords, searchWords);
+                },
                 ScoreThresholdUtils.USER_SCORE_THRESHOLD,
                 User::getId,
                 (user, score) -> {
@@ -202,7 +227,6 @@ public class SearchService {
                 }
         );
     }
-
 
     /**
      * Filtering for courses based on the provided category ID and a list of topic IDs, and converts them to CourseResponseDto objects.
@@ -224,5 +248,4 @@ public class SearchService {
 
         return new CourseListResponseDto(courses, (int)coursesPage.getTotalElements());
     }
-
 }

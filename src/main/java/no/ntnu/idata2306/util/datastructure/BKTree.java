@@ -2,15 +2,12 @@ package no.ntnu.idata2306.util.datastructure;
 
 import no.ntnu.idata2306.util.StringUtils;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * BKTree is a data structure used for efficient fuzzy searching.
  * It organizes elements in a way that allows for quick retrieval of close matches based on edit distance.
- * This implementation uses the Damerau-Levenshtein distance to measure the similarity between elements.
+ * This implementation includes support for hybrid search combining Damerau-Levenshtein distance for fuzzy matching.
  *
  * @param <T> the type of elements stored in the BKTree.
  */
@@ -41,7 +38,11 @@ public class BKTree<T> {
 
     /**
      * Searches for elements in the BKTree that are within a specified edit distance from the query.
-     * The search is performed recursively, starting from the root.
+     * The search is performed recursively, starting from the root and using Damerau-Levenshtein distance.
+     * 
+     * The BK-Tree is structured based on edit distance, which makes it efficient for finding
+     * candidates that are within a certain edit distance of the query term. This is the primary
+     * search mechanism that provides candidate matches for further refinement.
      *
      * @param query     the query element to search for.
      * @param threshold the maximum edit distance allowed for matches.
@@ -53,6 +54,54 @@ public class BKTree<T> {
             root.search(query, threshold, results);
         }
         return results;
+    }
+    
+    /**
+     * Performs a hybrid search that prioritizes exact term matches.
+     *
+     * @param query     the query element to search for.
+     * @param threshold the maximum edit distance allowed for matches.
+     * @return a list of elements sorted by their relevance to the query.
+     */
+    public List<T> hybridSearch(T query, int threshold) {
+        List<T> candidates = search(query, threshold);
+        
+        if (candidates.isEmpty()) {
+            return candidates;
+        }
+        
+        String queryStr = query.toString().toLowerCase();
+        List<Map.Entry<T, Double>> scoredCandidates = new ArrayList<>();
+        
+        for (            T candidate : candidates) {
+            String candidateStr = candidate.toString().toLowerCase();
+            
+            // Calculate base similarity score using Damerau-Levenshtein distance
+            int distance = StringUtils.damerauLevenshteinDistance(queryStr, candidateStr).getDistance();
+            int maxLength = Math.max(queryStr.length(), candidateStr.length());
+            double similarity = (1.0 - (double)distance / maxLength) * 65; // Scale to max 65 (out of 100)
+            
+            // Exact match gets full score
+            if (queryStr.equals(candidateStr)) {
+                similarity = 100.0;
+            }
+            
+            // Cap the final score to be within a reasonable range (0-85)
+            similarity = Math.min(85.0, similarity);
+            
+            scoredCandidates.add(Map.entry(candidate, similarity));
+                    }
+        
+        // Sort by score (descending)
+        scoredCandidates.sort((a, b) -> Double.compare(b.getValue(), a.getValue()));
+        
+        // Extract just the candidates
+        List<T> result = new ArrayList<>();
+        for (Map.Entry<T, Double> entry : scoredCandidates) {
+            result.add(entry.getKey());
+                    }
+        
+        return result;
     }
 
     /**
@@ -100,14 +149,14 @@ public class BKTree<T> {
             if (distance <= threshold) {
                 results.add(this.element);
             }
-            for (int i = Math.max(0, distance - threshold); i <= distance + threshold; i++) {
+            for (            int i = Math.max(0, distance - threshold); i <= distance + threshold; i++) {
                 List<Node> childList = children.get(i);
                 if (childList != null) {
                     for (Node child : childList) {
                         child.search(query, threshold, results);
-                    }
+                                            }
                 }
-            }
+                            }
         }
     }
 }

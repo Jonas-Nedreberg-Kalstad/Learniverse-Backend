@@ -13,20 +13,6 @@ public class StringUtils {
      * It is defined as the minimum number of single-character edits (insertions, deletions, or substitutions)
      * required to change one string into the other.
      *
-     * This method uses dynamic programming to efficiently calculate the distance.
-     * The algorithm works as follows:
-     * <ul>
-     *   <li>Create a 2D array `dp` where `dp[i][j]` represents the Levenshtein distance between the first `i` characters of string `a` and the first `j` characters of string `b`.</li>
-     *   <li>Initialize the first row and column of the array. `dp[i][0]` is `i` and `dp[0][j]` is `j` because it takes `i` deletions to convert the first `i` characters of `a` to an empty string, and `j` insertions to convert an empty string to the first `j` characters of `b`.</li>
-     *   <li>Fill in the rest of the array using the following recurrence relation:
-     *     <ul>
-     *       <li>If the characters `a[i-1]` and `b[j-1]` are the same, then `dp[i][j] = dp[i-1][j-1]`.</li>
-     *       <li>If the characters are different, then `dp[i][j] = 1 + min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1])`.</li>
-     *     </ul>
-     *   </li>
-     *   <li>The value at `dp[a.length()][b.length()]` is the Levenshtein distance between the two strings.</li>
-     * </ul>
-     *
      * @param a the first string.
      * @param b the second string.
      * @return the Levenshtein distance between the two strings.
@@ -55,24 +41,9 @@ public class StringUtils {
      * It is defined as the minimum number of single-character edits (insertions, deletions, substitutions, or transpositions)
      * required to change one string into the other.
      *
-     * This method uses dynamic programming to efficiently calculate the distance.
-     * The algorithm works as follows:
-     * <ul>
-     *   <li>Create a 2D array `dp` where `dp[i][j]` represents the Damerau-Levenshtein distance between the first `i` characters of string `a` and the first `j` characters of string `b`.</li>
-     *   <li>Initialize the first row and column of the array. `dp[i][0]` is `i` and `dp[0][j]` is `j` because it takes `i` deletions to convert the first `i` characters of `a` to an empty string, and `j` insertions to convert an empty string to the first `j` characters of `b`.</li>
-     *   <li>Fill in the rest of the array using the following recurrence relation:
-     *     <ul>
-     *       <li>If the characters `a[i-1]` and `b[j-1]` are the same, then `dp[i][j] = dp[i-1][j-1]`.</li>
-     *       <li>If the characters are different, then `dp[i][j] = 1 + min(dp[i-1][j-1], dp[i-1][j], dp[i][j-1])`.</li>
-     *       <li>Additionally, if `i > 1` and `j > 1` and the characters `a[i-1]` and `b[j-2]` are the same, and `a[i-2]` and `b[j-1]` are the same, then `dp[i][j] = min(dp[i][j], dp[i-2][j-2] + 1)` to account for transpositions.</li>
-     *     </ul>
-     *   </li>
-     *   <li>The value at `dp[a.length()][b.length()]` is the Damerau-Levenshtein distance between the two strings.</li>
-     * </ul>
-     *
      * @param a the first string.
      * @param b the second string.
-     * @return an array where the first element is the Damerau-Levenshtein distance and the second element is the number of transpositions.
+     * @return an object containing the Damerau-Levenshtein distance and the number of transpositions.
      */
     public static LevenshteinDto damerauLevenshteinDistance(String a, String b) {
         int[][] dp = new int[a.length() + 1][b.length() + 1];
