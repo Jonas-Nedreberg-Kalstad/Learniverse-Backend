@@ -9,6 +9,7 @@ import no.ntnu.idata2306.model.Review;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.model.course.Course;
 import no.ntnu.idata2306.repository.ReviewRepository;
+import no.ntnu.idata2306.util.repository.RepositoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -72,7 +73,8 @@ public class ReviewService {
     public ReviewResponseDto createReview(ReviewRequestDto reviewRequestDto, User user) {
         Course course = courseService.findCourseById(reviewRequestDto.getCourseId());
 
-        Review review = ReviewMapper.INSTANCE.reviewRequestDtoToReview(reviewRequestDto, user);
+        Review review = ReviewMapper.INSTANCE.reviewRequestDtoToReview(reviewRequestDto);
+        review.setUser(user);
         review.setCourse(course);
         review.setCreated(LocalDateTime.now());
 
@@ -113,10 +115,6 @@ public class ReviewService {
      * @throws EntityNotFoundException if the review with the specified ID is not found
      */
     private Review findReviewById(int id) {
-        return this.reviewRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Review not found with ID: {}", id);
-                    return new EntityNotFoundException("Review not found with ID: " + id);
-                });
+        return RepositoryUtils.findEntityById(reviewRepository::findById, id, Review.class);
     }
 }

@@ -5,7 +5,6 @@ import no.ntnu.idata2306.dto.order.OrderResponseDto;
 import no.ntnu.idata2306.exception.CardTokenHashException;
 import no.ntnu.idata2306.mapper.course.CourseMapper;
 import no.ntnu.idata2306.model.payment.Orders;
-import no.ntnu.idata2306.model.payment.Payment;
 import no.ntnu.idata2306.model.payment.PaymentCard;
 import no.ntnu.idata2306.util.HashUtils;
 import org.mapstruct.Mapper;

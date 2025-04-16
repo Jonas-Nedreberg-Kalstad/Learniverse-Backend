@@ -6,14 +6,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import no.ntnu.idata2306.dto.course.CourseListResponseDto;
 import no.ntnu.idata2306.dto.course.CourseResponseDto;
 import no.ntnu.idata2306.dto.search.request.CategoryAndTopicsSearch;
 import no.ntnu.idata2306.dto.search.request.UserSearchCriteria;
-import no.ntnu.idata2306.dto.search.response.ScoredUser;
+import no.ntnu.idata2306.dto.search.response.*;
 import no.ntnu.idata2306.dto.search.request.SearchCriteria;
-import no.ntnu.idata2306.dto.search.response.SearchResult;
 import no.ntnu.idata2306.service.SearchService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -53,12 +53,84 @@ public class SearchController {
             @ApiResponse(responseCode = "400", description = "Invalid search criteria"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/anonymous/search")
-    public ResponseEntity<SearchResult> search(@RequestBody SearchCriteria criteria,
-                                               @RequestParam(defaultValue = "0") int page,
-                                               @RequestParam(defaultValue = "5") int size) {
+    @PostMapping("/anonymous/multiParameterSearch")
+    public ResponseEntity<SearchResult> multiParameterSearch(@Valid @RequestBody SearchCriteria criteria,
+                                                             @RequestParam(defaultValue = "0") int page,
+                                                             @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);
-        SearchResult result = this.searchService.search(criteria, pageable);
+        SearchResult result = this.searchService.multiParameterSearch(criteria, pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Searches for courses based on the provided search criteria.
+     * The search results are paginated.
+     *
+     * @param criteria the search criteria containing the course name, category name, and topic name to search for (only course is used)
+     * @param page     the page number to retrieve (default is 0)
+     * @param size     the number of records per page (default is 5)
+     * @return ResponseEntity with the SearchResult object containing the scored courses, categories, and topics, along with pagination information
+     */
+    @Operation(summary = "Search for courses", description = "Searches for courses based on the provided search criteria. The results are paginated.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Search results retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ScoredCourse.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid search criteria"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/anonymous/courseSearch")
+    public ResponseEntity<List<ScoredCourse>> courseSearch(@Valid @RequestBody SearchCriteria criteria,
+                                                           @RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<ScoredCourse> result = this.searchService.courseSearch(criteria.getCourseName(), pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Searches for categories, and topics based on the provided search criteria.
+     * The search results are paginated.
+     *
+     * @param criteria the search criteria containing the course name, category name, and topic name to search for (only category is used)
+     * @param page     the page number to retrieve (default is 0)
+     * @param size     the number of records per page (default is 5)
+     * @return ResponseEntity with the SearchResult object containing the scored courses, categories, and topics, along with pagination information
+     */
+    @Operation(summary = "Search for categories", description = "Searches for categories based on the provided search criteria. The results are paginated.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Search results retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ScoredCategory.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid search criteria"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/anonymous/categorySearch")
+    public ResponseEntity<List<ScoredCategory>> categorySearch(@Valid @RequestBody SearchCriteria criteria,
+                                                               @RequestParam(defaultValue = "0") int page,
+                                                               @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<ScoredCategory> result = this.searchService.categorySearch(criteria.getCategoryName(), pageable);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Searches for courses, categories, and topics based on the provided search criteria.
+     * The search results are paginated.
+     *
+     * @param criteria the search criteria containing the course name, category name, and topic name to search for
+     * @param page     the page number to retrieve (default is 0)
+     * @param size     the number of records per page (default is 5)
+     * @return ResponseEntity with the SearchResult object containing the scored courses, categories, and topics, along with pagination information
+     */
+    @Operation(summary = "Search for courses, categories, and topics", description = "Searches for courses, categories, and topics based on the provided search criteria. The results are paginated.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Search results retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = ScoredTopic.class))),
+            @ApiResponse(responseCode = "400", description = "Invalid search criteria"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/anonymous/topicSearch")
+    public ResponseEntity<List<ScoredTopic>> topicSearch(@Valid @RequestBody SearchCriteria criteria,
+                                                         @RequestParam(defaultValue = "0") int page,
+                                                         @RequestParam(defaultValue = "5") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<ScoredTopic> result = this.searchService.topicSearch(criteria.getTopicName(), pageable);
         return ResponseEntity.ok(result);
     }
 
@@ -79,9 +151,9 @@ public class SearchController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/anonymous/search/findCourseByFilteringIdsAndMaxPrice")
-    public ResponseEntity<CourseListResponseDto> findCourseByFilteringIdsAndMaxPrice(@RequestBody CategoryAndTopicsSearch search,
-                                                                                  @RequestParam(defaultValue = "0") int page,
-                                                                                  @RequestParam(defaultValue = "5") int size) {
+    public ResponseEntity<CourseListResponseDto> findCourseByFilteringIdsAndMaxPrice(@Valid @RequestBody CategoryAndTopicsSearch search,
+                                                                                     @RequestParam(defaultValue = "0") int page,
+                                                                                     @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);
         CourseListResponseDto result = this.searchService.advancedIdsAndMaxPriceFiltering(search, pageable);
         return ResponseEntity.ok(result);
@@ -103,7 +175,7 @@ public class SearchController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/admin/search/userFullName")
-    public ResponseEntity<List<ScoredUser>> searchUsers(@RequestBody UserSearchCriteria search,
+    public ResponseEntity<List<ScoredUser>> searchUsers(@Valid @RequestBody UserSearchCriteria search,
                                                         @RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "5") int size) {
         Pageable pageable = PageRequest.of(page, size);

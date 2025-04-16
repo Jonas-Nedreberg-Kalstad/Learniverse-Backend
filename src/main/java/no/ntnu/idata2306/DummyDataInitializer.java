@@ -199,32 +199,81 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
             Role userRole = new Role();
             userRole.setRole("USER");
 
+            Role providerRole = new Role();
+            providerRole.setRole("PROVIDER");
+
             roleRepository.save(adminRole);
             roleRepository.save(userRole);
+            roleRepository.save(providerRole);
 
             // Create users
-            User adminUser = new User();
-            adminUser.setFirstName("Admin");
-            adminUser.setLastName("User");
-            adminUser.setEmail("admin@example.com");
-            adminUser.setPassword(this.passwordEncoder.encode("adminpass"));
-            adminUser.setCreated(LocalDateTime.now());
-            adminUser.setDeleted(false);
-            adminUser.setProvider(ntnuProvider);
-            adminUser.setRoles(new LinkedHashSet<>(Set.of(adminRole)));
+            User adminUser1 = new User();
+            adminUser1.setFirstName("Dave");
+            adminUser1.setLastName("Davidson");
+            adminUser1.setEmail("dave");
+            adminUser1.setPassword(this.passwordEncoder.encode("Dangerous2024"));
+            adminUser1.setCreated(LocalDateTime.now());
+            adminUser1.setDeleted(false);
+            adminUser1.setProvider(ntnuProvider);
+            adminUser1.setRoles(new LinkedHashSet<>(Set.of(adminRole)));
 
-            User regularUser = new User();
-            regularUser.setFirstName("Regular");
-            regularUser.setLastName("User");
-            regularUser.setEmail("user@example.com");
-            regularUser.setPassword(this.passwordEncoder.encode("userpass"));
-            regularUser.setCreated(LocalDateTime.now());
-            regularUser.setDeleted(false);
-            regularUser.setRoles(new LinkedHashSet<>(Set.of(userRole)));
+            User regularUser1 = new User();
+            regularUser1.setFirstName("Chuck");
+            regularUser1.setLastName("Chicken");
+            regularUser1.setEmail("chuck");
+            regularUser1.setPassword(this.passwordEncoder.encode("Nunchucks2024"));
+            regularUser1.setCreated(LocalDateTime.now());
+            regularUser1.setProvider(ntnuProvider);
+            regularUser1.setDeleted(false);
+            regularUser1.setRoles(new LinkedHashSet<>(Set.of(userRole)));
+
+            User adminUser2 = new User();
+            adminUser2.setFirstName("Admin");
+            adminUser2.setLastName("User");
+            adminUser2.setEmail("admin@example.com");
+            adminUser2.setPassword(this.passwordEncoder.encode("adminpass"));
+            adminUser2.setCreated(LocalDateTime.now());
+            adminUser2.setDeleted(false);
+            adminUser2.setProvider(oracleProvider);
+            adminUser2.setRoles(new LinkedHashSet<>(Set.of(adminRole)));
+
+            User regularUser2 = new User();
+            regularUser2.setFirstName("Regular");
+            regularUser2.setLastName("User");
+            regularUser2.setEmail("user@example.com");
+            regularUser2.setPassword(this.passwordEncoder.encode("userpass"));
+            regularUser2.setCreated(LocalDateTime.now());
+            regularUser2.setDeleted(false);
+            regularUser2.setProvider(oracleProvider);
+            regularUser2.setRoles(new LinkedHashSet<>(Set.of(userRole)));
+
+            User providerUser = new User();
+            providerUser.setFirstName("Provider");
+            providerUser.setLastName("User");
+            providerUser.setEmail("provider@example.com");
+            providerUser.setPassword(this.passwordEncoder.encode("providerpass"));
+            providerUser.setCreated(LocalDateTime.now());
+            providerUser.setDeleted(false);
+            providerUser.setProvider(oracleProvider);
+            providerUser.setRoles(new LinkedHashSet<>(Set.of(providerRole)));
+
+            User providerUser2 = new User();
+            providerUser2.setFirstName("Provider");
+            providerUser2.setLastName("User");
+            providerUser2.setEmail("provider2@example.com");
+            providerUser2.setPassword(this.passwordEncoder.encode("providerpass"));
+            providerUser2.setCreated(LocalDateTime.now());
+            providerUser2.setDeleted(false);
+            providerUser2.setProvider(oracleProvider);
+            providerUser2.setRoles(new LinkedHashSet<>(Set.of(providerRole)));
 
             // Save users
-            userRepository.save(adminUser);
-            userRepository.save(regularUser);
+            userRepository.save(adminUser1);
+            userRepository.save(regularUser1);
+            userRepository.save(adminUser2);
+            userRepository.save(regularUser2);
+            userRepository.save(providerUser);
+            userRepository.save(providerUser2);
 
             // Create categories
             Category itCategory = new Category();
@@ -1007,7 +1056,7 @@ public class DummyDataInitializer implements ApplicationListener<ApplicationEven
                             .created(LocalDateTime.now().minusDays(RANDOM.nextInt(365)))
                             .helpfulVotes(RANDOM.nextInt(100))
                             .reported(RANDOM.nextBoolean())
-                            .user(adminUser)
+                            .user(adminUser2)
                             .course(course)
                             .build();
 

@@ -63,7 +63,7 @@ public class SearchService {
      * @param pageable  the pagination information.
      * @return a SearchResult object containing the scored courses, categories, and topics, or null if no results are found.
      */
-    public SearchResult search(SearchCriteria criteria, Pageable pageable) {
+    public SearchResult multiParameterSearch(SearchCriteria criteria, Pageable pageable) {
         // Validate and prepare search inputs
         String courseName = criteria.getCourseName() != null ? criteria.getCourseName().trim().toLowerCase() : "";
         String topicName = criteria.getTopicName() != null ? criteria.getTopicName().trim().toLowerCase() : "";
@@ -92,7 +92,7 @@ public class SearchService {
      * @param pageable   the pagination information.
      * @return a paginated list of scored courses based on the search criteria.
      */
-    private List<ScoredCourse> courseSearch(String courseName, Pageable pageable) {
+    public List<ScoredCourse> courseSearch(String courseName, Pageable pageable) {
         if (courseName == null || courseName.isEmpty()) {
             return List.of();
         }

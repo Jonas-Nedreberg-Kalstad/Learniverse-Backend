@@ -119,6 +119,26 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     * Handles ReceiptGenerationException and returns a response with an error message.
+     *
+     * @param ex the ReceiptGenerationException thrown
+     * @return ResponseEntity containing the error message, with HTTP status 500 (Internal Server Error)
+     */
+    @ExceptionHandler(ReceiptGenerationException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<Map<String, Object>> handleReceiptGenerationException(ReceiptGenerationException ex) {
+
+        Map<String, Object> errorDetails = new HashMap<>();
+        errorDetails.put(TIMESTAMP, LocalDateTime.now());
+        errorDetails.put(MESSAGE, "Failed to generate receipt. Please try again later.");
+        errorDetails.put(DETAILS, ex.getMessage());
+        errorDetails.put(ERROR_CODE, HttpStatus.INTERNAL_SERVER_ERROR.toString());
+
+        log.error("Receipt generation error details: {}, error: ", errorDetails, ex);
+        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    /**
      * Handles all other exceptions and returns a response with an error message.
      *
      * @param ex the Exception thrown

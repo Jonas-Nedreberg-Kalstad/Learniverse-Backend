@@ -43,7 +43,7 @@ public class SearchUtils {
 
     /**
      * Performs an enhanced fuzzy search using a hybrid approach combining Damerau-Levenshtein distance 
-     * and N-gram similarity. This method allows full control over how similarity scores are calculated.
+     * and unordered search. This method allows full control over how similarity scores are calculated.
      * 
      * The search process works as follows:
      * A BK-Tree is initialized with the data to enable efficient fuzzy searching

@@ -14,6 +14,7 @@ import no.ntnu.idata2306.model.course.CourseEnrollments;
 import no.ntnu.idata2306.model.payment.*;
 import no.ntnu.idata2306.repository.course.CourseEnrollmentsRepository;
 import no.ntnu.idata2306.repository.payment.*;
+import no.ntnu.idata2306.util.repository.RepositoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -32,10 +33,13 @@ public class OrderService {
     private final CourseService courseService;
     private final PaymentMethodRepository paymentMethodRepository;
     private final PaymentCardRepository paymentCardRepository;
+    private final EmailService emailService;
+    
     @Autowired
     public OrderService(OrderRepository orderRepository, PaymentRepository paymentRepository, OrderStatusRepository orderStatusRepository,
                         CourseEnrollmentsRepository courseEnrollmentsRepository, CourseService courseService,
-                        PaymentMethodRepository paymentMethodRepository, PaymentCardRepository paymentCardRepository) {
+                        PaymentMethodRepository paymentMethodRepository, PaymentCardRepository paymentCardRepository,
+                        EmailService emailService) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
         this.orderStatusRepository = orderStatusRepository;
@@ -43,6 +47,7 @@ public class OrderService {
         this.courseService = courseService;
         this.paymentMethodRepository = paymentMethodRepository;
         this.paymentCardRepository = paymentCardRepository;
+        this.emailService = emailService;
     }
 
 
@@ -64,12 +69,8 @@ public class OrderService {
      * @return the Order object if found
      * @throws EntityNotFoundException if the order with the specified ID is not found
      */
-    private Orders findOrderById(int id) {
-        return this.orderRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Order not found with ID: {}", id);
-                    return new EntityNotFoundException("Order not found with ID: " + id);
-                });
+    public Orders findOrderById(int id) {
+        return RepositoryUtils.findEntityById(orderRepository::findById, id, Orders.class);
     }
 
     /**
@@ -97,9 +98,23 @@ public class OrderService {
     }
 
     /**
+     * Checks if the specified order belongs to the given user.
+     *
+     * @param orderId the ID of the order to check
+     * @param user the user to check against
+     * @return true if the order belongs to the user, false otherwise
+     * @throws EntityNotFoundException if the order with the specified ID is not found
+     */
+    public boolean isOrderOwnedByUser(int orderId, User user) {
+        Orders order = findOrderById(orderId);
+        return order.getUser().getId() == user.getId();
+    }
+
+    /**
      * Processes an order payment using a debit card and enrolls the user in the course.
      * This method creates a new order, adds payment card information, processes the payment, and updates the order status.
-     * If the payment is successful, the user is enrolled in the course. If any step fails, the transaction is rolled back.
+     * If the payment is successful, the user is enrolled in the course and a receipt is generated and sent via email.
+     * If any step fails, the transaction is rolled back.
      *
      * @param orderPaymentDto the DTO containing order payment information
      * @param user the user who is placing the order
@@ -152,8 +167,21 @@ public class OrderService {
             CourseEnrollments courseEnrollments = CourseEnrollmentsMapper.INSTANCE.toCourseEnrollments(course, user, created, true);
             courseEnrollmentsRepository.save(courseEnrollments);
             log.info("User enrolled in course with Order ID: {}", savedOrder.getId());
+            
+            try {
+                boolean emailSent = emailService.sendOrderReceiptEmail(savedOrder.getId(), user.getId(), null);
+                if (emailSent) {
+                    log.info("Receipt email sent successfully for Order ID: {}", savedOrder.getId());
+                } else {
+                    log.warn("Failed to send receipt email for Order ID: {}", savedOrder.getId());
+                }
+            } catch (Exception e) {
+                // Don't fail the transaction if email sending fails
+                log.error("Error sending receipt email for Order ID: {}", savedOrder.getId(), e);
+            }
+            
             OrderResponseDto orderResponseDto = OrderPaymentMapper.INSTANCE.ordersToOrderResponseDto(savedOrder);
-            log.error("User enrolled in course with Order: {}", orderResponseDto);
+            log.info("User enrolled in course with Order: {}", orderResponseDto);
         } else {
             savedOrder.setOrderStatus(orderStatusRepository.findByStatus(OrderStatusEnum.PAYMENT_FAILED));
             orderRepository.save(savedOrder);

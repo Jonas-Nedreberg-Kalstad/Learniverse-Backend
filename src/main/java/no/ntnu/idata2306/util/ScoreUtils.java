@@ -60,8 +60,8 @@ public class ScoreUtils {
         }
         
         if (correctLowercase.size() == 1 && searchLowercase.size() == 1) {
-            String correctWord = correctLowercase.get(0);
-            String searchWord = searchLowercase.get(0);
+            String correctWord = correctLowercase.getFirst();
+            String searchWord = searchLowercase.getFirst();
             
             // For single words, use Levenshtein distance directly
             LevenshteinDto dto = StringUtils.damerauLevenshteinDistance(correctWord, searchWord);

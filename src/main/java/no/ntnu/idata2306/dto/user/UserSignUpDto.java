@@ -34,5 +34,6 @@ public class UserSignUpDto {
     @Size(min = 4, max = 100, message = "Password must be between 4 and 100 characters")
     private String password;
 
+    @Size(max = 15, message = "Phone number must be at most 15 characters")
     private String phoneNumber; // Optional
 }

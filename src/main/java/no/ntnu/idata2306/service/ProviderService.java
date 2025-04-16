@@ -7,6 +7,7 @@ import no.ntnu.idata2306.dto.ProviderResponseDto;
 import no.ntnu.idata2306.mapper.ProviderMapper;
 import no.ntnu.idata2306.model.Provider;
 import no.ntnu.idata2306.repository.ProviderRepository;
+import no.ntnu.idata2306.util.repository.RepositoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -104,10 +105,6 @@ public class ProviderService {
      * @throws EntityNotFoundException if the provider with the specified ID is not found
      */
     public Provider findProviderById(int id) {
-        return this.providerRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Provider not found with ID: {}", id);
-                    return new EntityNotFoundException("Provider not found with ID: " + id);
-                });
+        return RepositoryUtils.findEntityById(providerRepository::findById, id, Provider.class);
     }
 }

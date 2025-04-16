@@ -4,6 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import no.ntnu.idata2306.model.Role;
 import no.ntnu.idata2306.repository.RoleRepository;
+import no.ntnu.idata2306.util.repository.RepositoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -37,10 +38,6 @@ public class RoleService {
      * @throws EntityNotFoundException if the role with the specified ID is not found
      */
     public Role findRoleById(int id){
-        return this.roleRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Role not found with ID: {}", id);
-                    return new EntityNotFoundException("Role not found with ID: " + id);
-                });
+        return RepositoryUtils.findEntityById(roleRepository::findById, id, Role.class);
     }
 }

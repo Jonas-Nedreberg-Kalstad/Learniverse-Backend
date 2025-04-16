@@ -38,7 +38,7 @@ public class SecurityConfiguration {
      * @param userDetailsService the user details service for loading user data
      * @param passwordEncoder the password encoder for encoding passwords
      * @param jwtFilter the JWT request filter for handling JWT authentication
-     * @param corsConfigurationSource
+     * @param corsConfigurationSource the CORS configuration source for handling cross-origin requests
      */
     @Autowired
     public SecurityConfiguration(UserDetailsService userDetailsService, @Lazy PasswordEncoder passwordEncoder, JwtRequestFilter jwtFilter,

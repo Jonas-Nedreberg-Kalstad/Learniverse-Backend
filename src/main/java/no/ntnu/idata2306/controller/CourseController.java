@@ -13,7 +13,6 @@ import no.ntnu.idata2306.dto.course.CreateCourseDto;
 import no.ntnu.idata2306.dto.course.UpdateCourseDto;
 import no.ntnu.idata2306.model.Role;
 import no.ntnu.idata2306.model.User;
-import no.ntnu.idata2306.repository.RoleRepository;
 import no.ntnu.idata2306.security.AuthorityLevel;
 import no.ntnu.idata2306.service.CourseService;
 import no.ntnu.idata2306.service.RoleService;
@@ -225,12 +224,14 @@ public class CourseController {
                                                                   @Valid @RequestBody UpdateCourseDto updateCourseDto) {
         User user = this.userService.getSessionUser();
         Role adminRole = this.roleService.findRoleByRoleName(AuthorityLevel.ADMIN);
-        if (user.getRoles().contains(adminRole) || (user.getProvider() != null && user.getProvider().getId() == providerId)) {
+
+        boolean isAdmin = user.getRoles().contains(adminRole);
+        if (!isAdmin && (user.getProvider() == null || user.getProvider().getId() != providerId)) {
             log.warn("User with ID: {} does not have access to update a course for the provider with ID: {}", user.getId(), providerId);
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        CourseResponseDto updatedCourse = this.courseService.updateCourseProvider(courseId, updateCourseDto, user, providerId);
+        CourseResponseDto updatedCourse = this.courseService.updateCourseProvider(courseId, updateCourseDto, user, providerId, isAdmin);
 
         if (updatedCourse == null){
             log.warn("User with ID: {} tried to update a course that does not belong to the provider with ID: {}", user.getId(), providerId);

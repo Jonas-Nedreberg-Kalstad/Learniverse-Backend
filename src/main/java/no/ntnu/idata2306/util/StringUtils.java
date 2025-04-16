@@ -70,5 +70,33 @@ public class StringUtils {
         return new LevenshteinDto(dp[a.length()][b.length()], transpositions);
     }
 
+    /**
+     * Converts a given string with underscores to Pascal Case with spaces.
+     * Pascal Case is a naming convention in which the first letter of each word is capitalized,
+     * and words are separated by spaces.
+     *
+     * Example:
+     * "PAYMENT_COMPLETED" -> "Payment Completed"
+     * "PENDING_PAYMENT" -> "Pending Payment"
+     *
+     * @param input the string to be converted to Pascal Case with spaces.
+     * @return the Pascal Case version of the input string with spaces. If the input is null or empty, it returns the input as is.
+     */
+    public static String toPascalCase(String input) {
+        if (input == null || input.isEmpty()) {
+            return input;
+        }
+        String[] words = input.split("_");
+        StringBuilder pascalCaseString = new StringBuilder();
+        for (String word : words) {
+            if (!word.isEmpty()) {
+                pascalCaseString.append(Character.toUpperCase(word.charAt(0)))
+                        .append(word.substring(1).toLowerCase())
+                        .append(" ");
+            }
+        }
+        return pascalCaseString.toString().trim();
+    }
+
     private StringUtils(){}
 }

@@ -1,5 +1,6 @@
 package no.ntnu.idata2306.mapper.course;
 
+import no.ntnu.idata2306.dto.course.CourseEnrollmentsResponseDto;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.model.course.Course;
 import no.ntnu.idata2306.model.course.CourseEnrollments;
@@ -36,4 +37,13 @@ public interface CourseEnrollmentsMapper {
     @Mapping(source = "enrolled", target = "enrolled")
     @Mapping(target = "id", ignore = true) // Ignore the id property
     CourseEnrollments toCourseEnrollments(Course course, User user, LocalDateTime created, boolean enrolled);
+
+    /**
+     * Converts a CourseEnrollments entity to a CourseEnrollmentsResponseDto.
+     *
+     * @param courseEnrollments the CourseEnrollments entity to convert
+     * @return the CourseEnrollmentsResponseDto object
+     */
+    @Mapping(source = "course", target = "course")
+    CourseEnrollmentsResponseDto courseEnrollmentsToCourseEnrollmentsResponseDto(CourseEnrollments courseEnrollments);
 }

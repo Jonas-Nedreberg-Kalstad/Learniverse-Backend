@@ -8,10 +8,10 @@ import no.ntnu.idata2306.dto.user.UserUpdateDto;
 import no.ntnu.idata2306.mapper.UserMapper;
 import no.ntnu.idata2306.model.Role;
 import no.ntnu.idata2306.model.User;
-import no.ntnu.idata2306.repository.RoleRepository;
 import no.ntnu.idata2306.repository.UserRepository;
 import no.ntnu.idata2306.security.AccessUserDetails;
 import no.ntnu.idata2306.security.AuthorityLevel;
+import no.ntnu.idata2306.util.repository.RepositoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.Authentication;
@@ -146,12 +146,8 @@ public class UserService implements UserDetailsService {
      * @return the User object if found
      * @throws EntityNotFoundException if the user with the specified ID is not found
      */
-    private User findUserById(int id) {
-        return this.userRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("User not found with ID: {}", id);
-                    return new EntityNotFoundException("User not found with ID: " + id);
-                });
+    public User findUserById(int id) {
+        return RepositoryUtils.findEntityById(userRepository::findById, id, User.class);
     }
 
     /**
@@ -191,7 +187,7 @@ public class UserService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws EntityNotFoundException {
         User user = this.userRepository.findByEmail(email).orElseThrow(() -> {
             log.error("Failed to load user details: User with email {} not found.", email);
-            return new EntityNotFoundException("No user found with the provided email address: " + email);
+            return new EntityNotFoundException("Invalid email or password");
         });
         
         return new AccessUserDetails(user);

@@ -11,6 +11,7 @@ import no.ntnu.idata2306.model.course.Course;
 import no.ntnu.idata2306.model.Review;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.repository.course.CourseRepository;
+import no.ntnu.idata2306.util.repository.RepositoryUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -158,15 +159,15 @@ public class CourseService {
      * @param updateCourseDto the DTO containing the updated course information
      * @param user the user that updated a course
      * @param providerId the course to be updated
+     * @param isAdmin whether the user is an admin can update the course
      * @return the updated CourseResponseDto object, or null if the course provider ID does not match the updater's provider ID
      */
-    public CourseResponseDto updateCourseProvider(int id, UpdateCourseDto updateCourseDto, User user, int providerId) {
+    public CourseResponseDto updateCourseProvider(int id, UpdateCourseDto updateCourseDto, User user, int providerId, boolean isAdmin) {
         Course course = findCourseById(id);
 
-        if (course.getProvider().getId() != providerId){
+        if (!isAdmin && (course.getProvider() == null || course.getProvider().getId() != providerId)) {
             return null;
         }
-
         CourseMapper.INSTANCE.updateCourseFromDto(updateCourseDto, course);
         course.setUpdated(LocalDateTime.now());
         course.setUpdatedBy(user);
@@ -220,10 +221,6 @@ public class CourseService {
      * @throws EntityNotFoundException if the course with the specified ID is not found
      */
     public Course findCourseById(int id) {
-        return this.courseRepository.findById(id)
-                .orElseThrow(() -> {
-                    log.error("Course not found with ID: {}", id);
-                    return new EntityNotFoundException("Course not found with ID: " + id);
-                });
+        return RepositoryUtils.findEntityById(courseRepository::findById, id, Course.class);
     }
 }
