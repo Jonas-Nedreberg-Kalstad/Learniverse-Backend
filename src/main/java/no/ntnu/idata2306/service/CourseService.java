@@ -57,6 +57,18 @@ public class CourseService {
     }
 
     /**
+     * Retrieves all courses from the repository based on the provider ID and converts them to CourseResponseDto objects.
+     *
+     * @param providerId the ID of the provider whose courses are to be retrieved
+     * @return a list of CourseResponseDto objects representing the courses of the specified provider.
+     */
+    public List<CourseResponseDto> getAllCoursesByProviderId(int providerId) {
+        return this.courseRepository.findCoursesByProviderId(providerId).stream()
+                .map(CourseMapper.INSTANCE::courseToResponseCourseDto)
+                .toList();
+    }
+
+    /**
      * Retrieves all active courses from the repository based on pagination information.
      *
      * @param pageable the pagination information.
@@ -122,12 +134,11 @@ public class CourseService {
      *
      * @param createCourseDto the DTO containing the course information
      * @param user the user that created a course
-     * @param providerId of the course to be created
      * @return the newly created CourseResponseDto object
      */
-    public CourseResponseDto createCourseProvider(CreateCourseDto createCourseDto, User user, int providerId) {
+    public CourseResponseDto createCourseProvider(CreateCourseDto createCourseDto, User user) {
         Course course = CourseMapper.INSTANCE.createCourseDtoToCourse(createCourseDto);
-        Provider provider = this.providerService.findProviderById(providerId);
+        Provider provider = this.providerService.findProviderById(user.getProvider().getId());
         course.setCreated(LocalDateTime.now());
         course.setCreatedBy(user);
         course.setProvider(provider);
@@ -158,14 +169,12 @@ public class CourseService {
      * @param id the ID of the course to be updated
      * @param updateCourseDto the DTO containing the updated course information
      * @param user the user that updated a course
-     * @param providerId the course to be updated
-     * @param isAdmin whether the user is an admin can update the course
      * @return the updated CourseResponseDto object, or null if the course provider ID does not match the updater's provider ID
      */
-    public CourseResponseDto updateCourseProvider(int id, UpdateCourseDto updateCourseDto, User user, int providerId, boolean isAdmin) {
+    public CourseResponseDto updateCourseProvider(int id, UpdateCourseDto updateCourseDto, User user) {
         Course course = findCourseById(id);
 
-        if (!isAdmin && (course.getProvider() == null || course.getProvider().getId() != providerId)) {
+        if ((course.getProvider() == null) || course.getProvider().getId() != user.getProvider().getId()) {
             return null;
         }
         CourseMapper.INSTANCE.updateCourseFromDto(updateCourseDto, course);

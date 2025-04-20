@@ -70,6 +70,24 @@ public class UserController {
     }
 
     /**
+     * Retrieves the details of the currently logged-in user.
+     * Error code 500 is handled by global exception handler.
+     *
+     * @return ResponseEntity with the UserResponseDto object and HTTP status
+     */
+    @Operation(summary = "Get current user details", description = "Retrieves the details of the currently logged-in user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User details retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class))),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/user/userDetails")
+    public ResponseEntity<UserResponseDto> getUserDetails() {
+        User user = userService.getSessionUser();
+        UserResponseDto userResponseDto = UserMapper.INSTANCE.userToUserResponseDto(user);
+        return ResponseEntity.ok(userResponseDto);
+    }
+
+    /**
      * Retrieves a user by their ID.
      * Error code 404 and 500 is handled by global exception handler.
      *
@@ -153,6 +171,28 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateUser(@PathVariable int id, @Valid @RequestBody UserUpdateDto userUpdateDto) {
         UserResponseDto updatedUser = this.userService.updateUser(id, userUpdateDto);
         log.info("User updated with ID: {}", id);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
+    /**
+     * Updates an existing user with the provided information.
+     * Error code 404 and 500 is handled by global exception handler.
+     *
+     * @param providerId the ID of the provider to associate with the user
+     * @param userId the ID of the user to update
+     * @return ResponseEntity with the updated UserResponseDto object and HTTP status
+     * @apiNote The password hash is not returned in the response for security reasons.
+     */
+    @Operation(summary = "Update an existing user", description = "Updates an existing user with the provided information.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class))),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PatchMapping("/admin/providers/{providerId}/{userId}")
+    public ResponseEntity<UserResponseDto> updateProviderUser(@PathVariable int providerId, @PathVariable int userId) {
+        UserResponseDto updatedUser = this.userService.updateProviderUser(userId, providerId);
+        log.info("User updated with ID: {}, and associated with provider ID: {}", userId, providerId);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 

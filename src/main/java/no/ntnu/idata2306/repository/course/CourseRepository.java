@@ -117,6 +117,14 @@ public interface CourseRepository extends JpaRepository<Course, Integer> {
                                                   Pageable pageable);
 
     /**
+     * Finds a list of courses by their provider ID.
+     *
+     * @param providerId the ID of the provider the course(s) belongs to.
+     * @return a list of courses.
+     */
+    List<Course> findCoursesByProviderId(Integer providerId);
+
+    /**
      * Finds all active courses.
      *
      * @return a list of active courses.

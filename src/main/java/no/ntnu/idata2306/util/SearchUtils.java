@@ -93,9 +93,9 @@ public class SearchUtils {
             uniqueIdentifiers
         );
         
-        // If we didn't find exact matches, try fuzzy matching through the BKTree
+        // If we didn't find exact matches, try fuzzy search through the BKTree
         if (!foundExactMatch || scoredItems.size() < pageable.getPageSize()) {
-            // Use BK-Tree hybrid search for fuzzy matching
+            // Use BK-Tree hybrid search for fuzzy search
             fuzzyMatchWithBKTree(
                 data,
                 normalizedSearchTerm,

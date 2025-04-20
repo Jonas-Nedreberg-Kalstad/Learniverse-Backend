@@ -4,9 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import no.ntnu.idata2306.model.User;
+import no.ntnu.idata2306.dto.ProviderResponseDto;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * Data Transfer Object for user responses.
@@ -25,4 +26,6 @@ public class UserResponseDto {
     private LocalDateTime created;
     private LocalDateTime updated;
     private boolean deleted;
+    private ProviderResponseDto provider;
+    private List<RoleResponseDto> roles;
 }

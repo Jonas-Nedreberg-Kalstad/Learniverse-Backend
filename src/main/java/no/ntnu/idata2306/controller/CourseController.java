@@ -11,11 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import no.ntnu.idata2306.dto.course.CourseResponseDto;
 import no.ntnu.idata2306.dto.course.CreateCourseDto;
 import no.ntnu.idata2306.dto.course.UpdateCourseDto;
-import no.ntnu.idata2306.model.Role;
 import no.ntnu.idata2306.model.User;
-import no.ntnu.idata2306.security.AuthorityLevel;
 import no.ntnu.idata2306.service.CourseService;
-import no.ntnu.idata2306.service.RoleService;
 import no.ntnu.idata2306.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -38,13 +35,11 @@ public class CourseController {
 
     private final CourseService courseService;
     private final UserService userService;
-    private final RoleService roleService;
 
     @Autowired
-    public CourseController(CourseService courseService, UserService userService, RoleService roleService) {
+    public CourseController(CourseService courseService, UserService userService) {
         this.courseService = courseService;
         this.userService = userService;
-        this.roleService = roleService;
     }
 
     /**
@@ -77,6 +72,30 @@ public class CourseController {
     @GetMapping("/anonymous/activeCourses")
     public List<CourseResponseDto> getAllActiveCourses() {
         return courseService.getAllActiveCourses();
+    }
+
+    /**
+     * Retrieves all courses for a specific provider.
+     * Error code 404 and 500 is handled by global exception handler.
+     *
+     * @return a list of CourseResponseDto objects representing all courses for the provider.
+     */
+    @Operation(summary = "Get all provider courses", description = "Retrieves a list of all courses for the provider.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Courses retrieved successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CourseResponseDto.class))),
+            @ApiResponse(responseCode = "403", description = "No access. User has not been associated with a valid provider."),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/provider/courses")
+    public ResponseEntity<List<CourseResponseDto>> getAllProviderCourses() {
+        User user = this.userService.getSessionUser();
+        if (user.getProvider() != null) {
+            List<CourseResponseDto> courses = this.courseService.getAllCoursesByProviderId(user.getProvider().getId());
+            log.info("Courses retrieved for provider with ID: {}", user.getProvider().getId());
+            return new ResponseEntity<>(courses, HttpStatus.OK);
+        }
+        log.warn("User with ID: {} does not have access to get all courses for the provider", user.getId());
+        return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
     /**
@@ -153,28 +172,26 @@ public class CourseController {
      * Error code 400, 404 and 500 is handled by global exception handler.
      *
      * @param createCourseDto the DTO containing course creation information
-     * @param providerId the providerId to get a new course added
      * @return ResponseEntity with the created CourseResponseDto object and HTTP status
      */
     @Operation(summary = "Create a new course", description = "Creates a new course with the provided information.")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Course created successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CourseResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Validation error"),
-            @ApiResponse(responseCode = "403", description = "User does not have access to create a course for the specified provider"),
+            @ApiResponse(responseCode = "403", description = "User does not have access to create a course"),
             @ApiResponse(responseCode = "404", description = "Provider not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping(value = "/provider/{providerId}/courses",  consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CourseResponseDto> createCourseProvider(@Valid @RequestBody CreateCourseDto createCourseDto, @PathVariable int providerId) {
+    @PostMapping(value = "/provider/courses",  consumes = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<CourseResponseDto> createCourseProvider(@Valid @RequestBody CreateCourseDto createCourseDto) {
         User user = this.userService.getSessionUser();
-        Role adminRole = this.roleService.findRoleByRoleName(AuthorityLevel.ADMIN);
-        if (user.getRoles().contains(adminRole) || (user.getProvider() != null && user.getProvider().getId() == providerId)) {
-            CourseResponseDto createdCourse = this.courseService.createCourseProvider(createCourseDto, user, providerId);
-            log.info("Course created with ID: {}, and provider ID: {}", createdCourse.getId(), providerId);
+        if (user.getProvider() != null) {
+            CourseResponseDto createdCourse = this.courseService.createCourseProvider(createCourseDto, user);
+            log.info("Course created with ID: {}, and provider ID: {}", createdCourse.getId(), user.getProvider().getId());
             return ResponseEntity.status(HttpStatus.CREATED).body(createdCourse);
         }
 
-        log.warn("User with ID: {} does not have access to create a course for the provider with ID: {}", user.getId(), providerId);
+        log.warn("User with ID: {} does not have access to create a course", user.getId());
         return new ResponseEntity<>(HttpStatus.FORBIDDEN);
     }
 
@@ -205,7 +222,6 @@ public class CourseController {
      * Updates an existing course with the provided information.
      * Error code 400, 404 and 500 is handled by global exception handler.
      *
-     * @param providerId the providerId of the course to update
      * @param courseId the ID of the course to update
      * @param updateCourseDto the DTO containing updated course information
      * @return ResponseEntity with the updated CourseResponseDto object and HTTP status
@@ -214,34 +230,29 @@ public class CourseController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Course updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = CourseResponseDto.class))),
             @ApiResponse(responseCode = "400", description = "Validation error"),
-            @ApiResponse(responseCode = "403", description = "User does not have access to update a course for the specified provider, " +
+            @ApiResponse(responseCode = "403", description = "User does not have access to update the course due to user not having a valid provider id, " +
                                                              "or the provider does not own the course to be updated"),
             @ApiResponse(responseCode = "404", description = "Course not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PatchMapping("/provider/{providerId}/courses/{courseId}")
-    public ResponseEntity<CourseResponseDto> updateCourseProvider(@PathVariable int providerId, @PathVariable int courseId,
+    @PatchMapping("/provider/courses/{courseId}")
+    public ResponseEntity<CourseResponseDto> updateCourseProvider(@PathVariable int courseId,
                                                                   @Valid @RequestBody UpdateCourseDto updateCourseDto) {
         User user = this.userService.getSessionUser();
-        Role adminRole = this.roleService.findRoleByRoleName(AuthorityLevel.ADMIN);
-
-        boolean isAdmin = user.getRoles().contains(adminRole);
-        if (!isAdmin && (user.getProvider() == null || user.getProvider().getId() != providerId)) {
-            log.warn("User with ID: {} does not have access to update a course for the provider with ID: {}", user.getId(), providerId);
+        if (user.getProvider() == null) {
+            log.warn("User with ID: {} does not have access to update the course with ID: {}", user.getId(), courseId);
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
-        CourseResponseDto updatedCourse = this.courseService.updateCourseProvider(courseId, updateCourseDto, user, providerId, isAdmin);
+        CourseResponseDto updatedCourse = this.courseService.updateCourseProvider(courseId, updateCourseDto, user);
 
         if (updatedCourse == null){
-            log.warn("User with ID: {} tried to update a course that does not belong to the provider with ID: {}", user.getId(), providerId);
+            log.warn("User with ID: {} tried to update a course that does not belong to the provider with ID: {}", user.getId(), user.getProvider().getId());
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
 
         log.info("Course updated with ID: {}", courseId);
         return new ResponseEntity<>(updatedCourse, HttpStatus.OK);
-
-
     }
 
     /**

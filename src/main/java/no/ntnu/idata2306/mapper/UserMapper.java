@@ -1,8 +1,10 @@
 package no.ntnu.idata2306.mapper;
 
+import no.ntnu.idata2306.dto.user.RoleResponseDto;
 import no.ntnu.idata2306.dto.user.UserResponseDto;
 import no.ntnu.idata2306.dto.user.UserSignUpDto;
 import no.ntnu.idata2306.dto.user.UserUpdateDto;
+import no.ntnu.idata2306.model.Role;
 import no.ntnu.idata2306.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -76,5 +78,13 @@ public interface UserMapper {
         updateUserFromDto(userUpdateDto, user);
         user.setPassword(passwordEncoder.encode(userUpdateDto.getPassword()));
     }
+
+    /**
+     * Converts a Role entity to a RoleResponseDto.
+     *
+     * @param role the Role entity
+     * @return the RoleResponseDto
+     */
+    RoleResponseDto roleToRoleResponseDto(Role role);
 
 }

@@ -6,6 +6,7 @@ import no.ntnu.idata2306.dto.user.UserResponseDto;
 import no.ntnu.idata2306.dto.user.UserSignUpDto;
 import no.ntnu.idata2306.dto.user.UserUpdateDto;
 import no.ntnu.idata2306.mapper.UserMapper;
+import no.ntnu.idata2306.model.Provider;
 import no.ntnu.idata2306.model.Role;
 import no.ntnu.idata2306.model.User;
 import no.ntnu.idata2306.repository.UserRepository;
@@ -32,6 +33,7 @@ public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final RoleService roleService;
+    private final ProviderService providersService;
 
     /**
      * Constructs a new instance of UserService.
@@ -40,12 +42,14 @@ public class UserService implements UserDetailsService {
      * @param userRepository the repository for managing user data
      * @param passwordEncoder the password encoder for hashing passwords
      * @param roleService the service for executing role logic
+     * @param providersService the service for executing  provider logic
      */
     @Autowired
-    public UserService(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder, RoleService roleService) {
+    public UserService(UserRepository userRepository, @Lazy PasswordEncoder passwordEncoder, RoleService roleService, ProviderService providersService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.roleService = roleService;
+        this.providersService = providersService;
     }
 
     /**
@@ -110,6 +114,22 @@ public class UserService implements UserDetailsService {
         UserMapper.INSTANCE.updateUserFromDtoWithPassword(userUpdateDto, user, this.passwordEncoder);
         userRepository.save(user);
         log.info("User was updated successfully with ID: {}", id);
+        return UserMapper.INSTANCE.userToUserResponseDto(user);
+    }
+
+    /**
+     * Updates an existing provider user with the provided information.
+     *
+     * @param userId the ID of the user to be updated
+     * @param providerId the ID of the provider to be associated with the user
+     * @return the updated UserResponseDto object
+     */
+    public UserResponseDto updateProviderUser(int userId, int providerId) {
+        User user = findUserById(userId);
+        Provider provider = this.providersService.findProviderById(providerId);
+        user.setProvider(provider);
+        this.userRepository.save(user);
+        log.info("User was updated successfully with ID: {}", userId);
         return UserMapper.INSTANCE.userToUserResponseDto(user);
     }
 
