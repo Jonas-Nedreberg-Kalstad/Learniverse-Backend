@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import no.ntnu.idata2306.dto.user.UpdateUserPasswordDto;
 import no.ntnu.idata2306.dto.user.UserResponseDto;
 import no.ntnu.idata2306.dto.user.UserSignUpDto;
 import no.ntnu.idata2306.dto.user.UserUpdateDto;
@@ -193,6 +194,52 @@ public class UserController {
     public ResponseEntity<UserResponseDto> updateProviderUser(@PathVariable int providerId, @PathVariable int userId) {
         UserResponseDto updatedUser = this.userService.updateProviderUser(userId, providerId);
         log.info("User updated with ID: {}, and associated with provider ID: {}", userId, providerId);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
+    /**
+     * Updates the password of an existing user.
+     * Error code 400, 404 and 500 is handled by global exception handler.
+     *
+     * @param id the ID of the user to update
+     * @param userPasswordDto the DTO containing the new password
+     * @return ResponseEntity with the updated UserResponseDto object and HTTP status
+     * @apiNote The password hash is not returned in the response for security reasons.
+     */
+    @Operation(summary = "Update user password", description = "Updates the password of an existing user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User password updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PatchMapping("/admin/users/{id}/password")
+    public ResponseEntity<UserResponseDto> updateUserPasswordAdmin(@PathVariable int id, @Valid @RequestBody UpdateUserPasswordDto userPasswordDto) {
+        UserResponseDto updatedUser = this.userService.updateUserPassword(id, userPasswordDto);
+        log.info("User updated with ID: {}", id);
+        return new ResponseEntity<>(updatedUser, HttpStatus.OK);
+    }
+
+    /**
+     * Updates the password of the currently logged-in user.
+     * Error code 400, 404 and 500 is handled by global exception handler.
+     *
+     * @param userPasswordDto the DTO containing the new password
+     * @return ResponseEntity with the updated UserResponseDto object and HTTP status
+     * @apiNote The password hash is not returned in the response for security reasons.
+     */
+    @Operation(summary = "Update current user password", description = "Updates the password of the currently logged-in user.")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User password updated successfully", content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserResponseDto.class))),
+            @ApiResponse(responseCode = "400", description = "Validation error"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PatchMapping("/user/userDetails/password")
+    public ResponseEntity<UserResponseDto> updateUserPassword(@Valid @RequestBody UpdateUserPasswordDto userPasswordDto) {
+        User user = userService.getSessionUser();
+        UserResponseDto updatedUser = this.userService.updateUserPassword(user.getId(), userPasswordDto);
+        log.info("User updated with ID: {}", user.getId());
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
 

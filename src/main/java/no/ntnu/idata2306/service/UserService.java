@@ -2,6 +2,7 @@ package no.ntnu.idata2306.service;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
+import no.ntnu.idata2306.dto.user.UpdateUserPasswordDto;
 import no.ntnu.idata2306.dto.user.UserResponseDto;
 import no.ntnu.idata2306.dto.user.UserSignUpDto;
 import no.ntnu.idata2306.dto.user.UserUpdateDto;
@@ -111,7 +112,7 @@ public class UserService implements UserDetailsService {
      */
     public UserResponseDto updateUser(int id, UserUpdateDto userUpdateDto) {
         User user = findUserById(id);
-        UserMapper.INSTANCE.updateUserFromDtoWithPassword(userUpdateDto, user, this.passwordEncoder);
+        UserMapper.INSTANCE.updateUserFromDto(userUpdateDto, user);
         userRepository.save(user);
         log.info("User was updated successfully with ID: {}", id);
         return UserMapper.INSTANCE.userToUserResponseDto(user);
@@ -130,6 +131,22 @@ public class UserService implements UserDetailsService {
         user.setProvider(provider);
         this.userRepository.save(user);
         log.info("User was updated successfully with ID: {}", userId);
+        return UserMapper.INSTANCE.userToUserResponseDto(user);
+    }
+
+    /**
+     * Updates the password of an existing user.
+     *
+     * @param userId the ID of the user whose password is to be updated
+     * @param userPasswordDto the DTO containing the new password
+     * @return the updated UserResponseDto object
+     */
+    public UserResponseDto updateUserPassword(int userId, UpdateUserPasswordDto userPasswordDto) {
+        User user = findUserById(userId);
+        UserMapper.INSTANCE.updateUserPassword(userPasswordDto, user, this.passwordEncoder);
+        user.setUpdated(LocalDateTime.now());
+        this.userRepository.save(user);
+        log.info("User password was updated successfully with ID: {}", userId);
         return UserMapper.INSTANCE.userToUserResponseDto(user);
     }
 

@@ -1,9 +1,6 @@
 package no.ntnu.idata2306.mapper;
 
-import no.ntnu.idata2306.dto.user.RoleResponseDto;
-import no.ntnu.idata2306.dto.user.UserResponseDto;
-import no.ntnu.idata2306.dto.user.UserSignUpDto;
-import no.ntnu.idata2306.dto.user.UserUpdateDto;
+import no.ntnu.idata2306.dto.user.*;
 import no.ntnu.idata2306.model.Role;
 import no.ntnu.idata2306.model.User;
 import org.mapstruct.Mapper;
@@ -68,15 +65,14 @@ public interface UserMapper {
     void updateUserFromDto(UserUpdateDto userUpdateDto, @MappingTarget User user);
 
     /**
-     * Updates an existing User entity with the provided UserUpdateDto and encrypts the password.
+     * Updates the password of an existing User entity with the provided UpdateUserPasswordDto and encrypts the password.
      *
-     * @param userUpdateDto the DTO containing user update information
+     * @param userPasswordDto the DTO containing the new password
      * @param user the User entity to be updated
-     * @param passwordEncoder the PasswordEncoder to encrypt the password
+     * @param passwordEncoder the PasswordEncoder to encrypt the new password
      */
-    default void updateUserFromDtoWithPassword(UserUpdateDto userUpdateDto, @MappingTarget User user, @Lazy PasswordEncoder passwordEncoder) {
-        updateUserFromDto(userUpdateDto, user);
-        user.setPassword(passwordEncoder.encode(userUpdateDto.getPassword()));
+    default void updateUserPassword(UpdateUserPasswordDto userPasswordDto, @MappingTarget User user, @Lazy PasswordEncoder passwordEncoder) {
+        user.setPassword(passwordEncoder.encode(userPasswordDto.getPassword()));
     }
 
     /**
