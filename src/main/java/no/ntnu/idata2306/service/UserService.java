@@ -120,15 +120,22 @@ public class UserService implements UserDetailsService {
 
     /**
      * Updates an existing provider user with the provided information.
-     *
-     * @param userId the ID of the user to be updated
      * @param providerId the ID of the provider to be associated with the user
+     * @param userId the ID of the user to be updated
      * @return the updated UserResponseDto object
      */
-    public UserResponseDto updateProviderUser(int userId, int providerId) {
+    public UserResponseDto updateProviderUser(int providerId, int userId) {
         User user = findUserById(userId);
-        Provider provider = this.providersService.findProviderById(providerId);
-        user.setProvider(provider);
+        Role providerRole = this.roleService.findRoleByRoleName(AuthorityLevel.PROVIDER);
+        user.getRoles().add(providerRole);
+
+        if (providerId <= 0) {
+            user.setProvider(null);
+        } else {
+            Provider provider = this.providersService.findProviderById(providerId);
+            user.setProvider(provider);
+        }
+
         this.userRepository.save(user);
         log.info("User was updated successfully with ID: {}", userId);
         return UserMapper.INSTANCE.userToUserResponseDto(user);

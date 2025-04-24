@@ -192,7 +192,7 @@ public class UserController {
     })
     @PatchMapping("/admin/providers/{providerId}/{userId}")
     public ResponseEntity<UserResponseDto> updateProviderUser(@PathVariable int providerId, @PathVariable int userId) {
-        UserResponseDto updatedUser = this.userService.updateProviderUser(userId, providerId);
+        UserResponseDto updatedUser = this.userService.updateProviderUser(providerId, userId);
         log.info("User updated with ID: {}, and associated with provider ID: {}", userId, providerId);
         return new ResponseEntity<>(updatedUser, HttpStatus.OK);
     }
