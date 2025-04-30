@@ -149,14 +149,14 @@ public class BKTree<T> {
             if (distance <= threshold) {
                 results.add(this.element);
             }
-            for (            int i = Math.max(0, distance - threshold); i <= distance + threshold; i++) {
+            for (int i = Math.max(0, distance - threshold); i <= distance + threshold; i++) {
                 List<Node> childList = children.get(i);
                 if (childList != null) {
                     for (Node child : childList) {
                         child.search(query, threshold, results);
-                                            }
+                    }
                 }
-                            }
+            }
         }
     }
 }
