@@ -1,0 +1,129 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "virtualMachines_LC_Web_Server_name": {
+            "defaultValue": "LC-Web-Server",
+            "type": "String"
+        },
+        "infrastructureLocation": {
+            "defaultValue": "norwayeast",
+            "type": "string"
+        },
+        "networkInterfaces_lc_web_server514_z1_externalid": {
+            "defaultValue": "/subscriptions/a2c71318-8b0a-4924-8645-82d4e855bc62/resourceGroups/LearniverseConnect/providers/Microsoft.Network/networkInterfaces/lc-web-server514_z1",
+            "type": "String"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Compute/virtualMachines",
+            "apiVersion": "2024-11-01",
+            "name": "[parameters('virtualMachines_LC_Web_Server_name')]",
+            "location": "norwayeast",
+            "zones": [
+                "1"
+            ],
+            "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                    "/subscriptions/a2c71318-8b0a-4924-8645-82d4e855bc62/resourceGroups/LearniverseConnect/providers/Microsoft.ManagedIdentity/userAssignedIdentities/LC-Identity": {}
+                }
+            },
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "Standard_B1ms"
+                },
+                "additionalCapabilities": {
+                    "hibernationEnabled": false
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "canonical",
+                        "offer": "0001-com-ubuntu-server-jammy",
+                        "sku": "22_04-lts-gen2",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                      "osType": "Linux",
+                      "name": "[concat(parameters('virtualMachines_LC_Web_Server_name'), '_OsDisk')]",
+                      "createOption": "FromImage",
+                      "caching": "ReadWrite",
+                      "managedDisk": {
+                        "storageAccountType": "Premium_LRS"
+                      },
+                      "deleteOption": "Delete",
+                      "diskSizeGB": 30
+                    },
+                    "dataDisks": [],
+                    "diskControllerType": "SCSI"
+                },
+                "osProfile": {
+                    "computerName": "[parameters('virtualMachines_LC_Web_Server_name')]",
+                    "adminUsername": "azureuser",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": true,
+                        "ssh": {
+                            "publicKeys": [
+                                {
+                                    "path": "/home/azureuser/.ssh/authorized_keys",
+                                    "keyData": "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDemA5SN1xvFRqqlb7Hb4wfQCEYIOrVj/vaI6DRCuzkyMFik3BFNeCd1v5C8p+Nzdu0k56xX7/ediwIIWtsvWo7E/xuvEp2wca111/X7Bu3CD7osC5On7g3n85Tabqj2FBP/T0/VcIZ7LTs81hud47leLk2WIRwjtE1UvB8EVbC9b3n7hJ/TlwMGv6gfs5C2GsldX2ZOyTi3v/J8NUW3+sqLzs/LQ93M1LdTjnlO5SfIKLXjglz0ScQvrtBIW7H18IKTwTEIM2ScTRpZgoNe5UfAP8Sxsf4w0lkoAq2gsXRsdEUcblbHUNLG6puIVTQOZ7pBZ4NmKhJ6012a5VohCYcnMwWWSP3je0RF8TeAJS/2vMFdA29QkC1tCAAP+Aun0Qmk5fTqEuXcIyWvcb1PeoB+CDXVZ0f4uvxvCgkHxVqYexrT92oOrKT4Ttl8EgAghfL8pGfkUQEceoOfGirWVhsfEVkde2jzJRSbMdrgYxuQqeaMwTuL8FnClGgfaIk0tjdpDdhTFP5WC19sOdx1/TlWYS2Ns3pFJ6Z2ubIuTs89nkLwDYj84tg5DKrFC+LD3v1AQ6DaE6dM3HOtqDu6QP0yLKGhDLfwz8ikNkKVpp9kTj5eUNgahKypV6K/tTOVR9CjC5Fodvib6yfq0oWx07clHRKUorj3ps2/xSNQ8G9tQ== tobbetobbeog@outlook.com"
+                                }
+                            ]
+                        },
+                        "provisionVMAgent": true,
+                        "patchSettings": {
+                            "patchMode": "AutomaticByPlatform",
+                            "automaticByPlatformSettings": {
+                                "rebootSetting": "IfRequired"
+                            },
+                            "assessmentMode": "ImageDefault"
+                        }
+                    },
+                    "secrets": [],
+                    "allowExtensionOperations": true
+                },
+                "securityProfile": {
+                    "uefiSettings": {
+                        "secureBootEnabled": true,
+                        "vTpmEnabled": true
+                    },
+                    "securityType": "TrustedLaunch"
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[parameters('networkInterfaces_lc_web_server514_z1_externalid')]",
+                            "properties": {
+                                "deleteOption": "Detach"
+                            }
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": true
+                    }
+                }
+            }
+        },
+        {
+            "type": "Microsoft.Compute/virtualMachines/extensions",
+            "name": "[concat(parameters('virtualMachines_LC_Web_Server_name'), '/installDocker')]",
+            "apiVersion": "2022-03-01",
+            "location": "[parameters('infrastructureLocation')]",
+            "dependsOn": ["[resourceId('Microsoft.Compute/virtualMachines', parameters('virtualMachines_LC_Web_Server_name'))]"],
+            "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.1",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                    "fileUris": ["https://learniverseconnectblob.blob.core.windows.net/bash-script/vminit.sh"],
+                    "commandToExecute": "chmod +x vminit.sh; bash vminit.sh;"
+                }
+            }
+        }
+    ]
+}
