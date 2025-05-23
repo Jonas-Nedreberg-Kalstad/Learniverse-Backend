@@ -159,3 +159,57 @@ Jonas is responsible for creating the project's technical documentation, includi
    - Doing minor enhancements and bug fixes
 
 Though we weren't able to integrate Azure DevOps into our project in time, the CI/CD pipeline is still outlined and should work. However, the attempt to get everything to work perfectly took a lot of time and ended up spending a lot of the time in this sprint working on the deployment still.
+
+
+# Project Retrospective
+
+We are very satisfied with the final results as we have learnt alot about backend technology when it comes to design patterns like DTO, MVC, and handling dataflows correctly through the Spring Boot application. Figuring out smart solutions to problems like search using Damerau Levenshtein Distance algorithm to calculate the distance between words / phrases, creating and using BK-Tree to optimize the search and creating a comprehensive scoring / weighting system for the search. Also deploying the server to an industry standard cloud provider like Azure with HTTPS. This made the course very fun and very relavant to the industry.
+
+Though we were only two people a lot has been achieved, however during this project we might have been a little too ambitious. We wanted the application to be in a minimum viable product stage with possibility for further expantion and with automatic deployment to the cloud server. This proved to be more time consuming than we initially expected and ended up spending a significant amount of extra time working on this project than expected.
+
+## Requirements
+The application has fufilled all expected features outlined in the project requirements with minor adjustments, as we found it better to separate the courses with multiple providers into all separate courses with a singular provider.
+
+### Extra Work:
+
+- Comprehensive exception handling with custom exception classes through a global exception handler that listens on specified exceptions
+- Unordered search combined with Damerau Levenshtein Distance using a custom BK-Tree datastructure for optimization. Using factory pattern to initialize BK-Tree
+- Custom scoring system for search using weights for unordered and fuzzy search.
+- Extensive use of Mappers to reduce boilerplate and increase readability
+- Sending Email and PDF generation
+- Using DTO and MVC pattern maintain and send data following best practices
+
+User
+- Request reciept
+- Change password
+- Review courses
+
+Provider
+- Deactivate course
+- Open an already existing course
+
+Admin
+- View all users
+- View all providers
+- Create new provider user and organization
+- Soft delete users, courses and providers
+
+Deployment
+- Backend is dockerized
+- CI/CD Pipeline (almost)
+- Azure Cloud infrastructure
+- Nginx communication with backend through proxy
+- publicly accessible website
+
+Security
+- JWT Token
+- Key vaults and secrets
+- Provider users can only create/edit a course for their provider, and cant access other providers
+
+**What could have been done better:**
+
+For the size of the group we tried to implement too many features, which ended up with us spending too much time on features which was out of the scope of the project. We should have started with a more modest goal rather than creating a more complex CRUD application, which impacted other courses we took this semester.
+
+Since we created a very ambitious database schema with many tables and potential features made the implementation easier, but some of the tables is not in use, since we did not have enough time to implement all those features. We should rather have implemented the core functionality and then expand later when we saw we had time.
+
+We should have shorter sprints, maybe a sprint every 1 or 2 weeks. This is due to continuous improvement, making it easier to identify and fix issues earlier, adjust priorities more frequently, and maintain better project momentum. Shorter feedback cycles would have helped us avoid feature overload and better manage our time commitments across all courses.
