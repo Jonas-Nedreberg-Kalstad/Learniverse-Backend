@@ -213,3 +213,9 @@ For the size of the group we tried to implement too many features, which ended u
 Since we created a very ambitious database schema with many tables and potential features made the implementation easier, but some of the tables is not in use, since we did not have enough time to implement all those features. We should rather have implemented the core functionality and then expand later when we saw we had time.
 
 We should have shorter sprints, maybe a sprint every 1 or 2 weeks. This is due to continuous improvement, making it easier to identify and fix issues earlier, adjust priorities more frequently, and maintain better project momentum. Shorter feedback cycles would have helped us avoid feature overload and better manage our time commitments across all courses.
+
+
+# Hotfix before final release:
+- Fixed Swagger API and config to point to correct URL / Path
+- Updating .env variables and compose.yaml
+- Finishing touches on readme.md
