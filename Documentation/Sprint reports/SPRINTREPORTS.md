@@ -134,3 +134,28 @@ When the sprint started, we started learning Azure, how to create resources, man
 
 **Problems encountered**  
 We encountered many issues when dockerizing, configuring the nginx and setting up the cloud infrastructure, so everything took longer than we initially expected, and we were not able to complete the CI/CD pipeline during this sprint.
+
+
+## Sprint 5: Finalize Project (Due date: May 23, 2025)
+**When did you work with the project – which weeks?**  
+We are working on this sprint in weeks 20-21, covering the period from May 13 to May 23, 2025.
+
+**What is the goal in this sprint?**  
+The goal is to finalize our project for submission by completing documentation, creating presentation materials, create and maintain a detailed README.md file and applying final polishing touches to the codebase.
+
+**How is the work being distributed among group members?**  
+Jonas is responsible for creating the project's technical documentation, including the setup guide, API references, and cloud infrastructure documentation. He is also tasked with finalizing the cloud configuration scripts. Tobias tested all API endpoints and user workflows. Both team members collaborated on scanning through project to see if we had all required documentation and mandatory specification.
+
+**What has been accomplished in this sprint so far?**
+
+1. Deployment:
+   - Pushed all finished IaC and initialization scripts
+   - Outlined a CI/CD pipeline for backend
+2. Documentation:
+   - Created and maintained a detailed README.md file with setup instructions for the project
+   - Uploading all remaining documentation in a readable format
+3. Code Finalization:
+   - Scanning through project to see if all code and documentation is consistent
+   - Doing minor enhancements and bug fixes
+
+Though we weren't able to integrate Azure DevOps into our project in time, the CI/CD pipeline is still outlined and should work. However, the attempt to get everything to work perfectly took a lot of time and ended up spending a lot of the time in this sprint working on the deployment still.
